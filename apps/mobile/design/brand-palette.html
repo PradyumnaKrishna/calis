@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calis Brand Palette</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --ink: #21201c;
+        --paper: #fdfdfc;
+        --muted: #63635e;
+        --line: #dad9d6;
+        --panel: #f1f0ef;
+        --dark-ink: #eeeeec;
+        --dark-paper: #111110;
+        --dark-muted: #b5b3ad;
+        --dark-line: #3b3a37;
+        --dark-panel: #222221;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #ebe9e4;
+        color: var(--ink);
+      }
+
+      main {
+        width: min(1120px, calc(100vw - 32px));
+        margin: 0 auto;
+        padding: 56px 0;
+      }
+
+      header {
+        max-width: 720px;
+        margin-bottom: 40px;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: #63635e;
+        font-size: 13px;
+        font-weight: 650;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(42px, 7vw, 88px);
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .summary {
+        margin: 24px 0 0;
+        color: #4c4b47;
+        font-size: 18px;
+        line-height: 1.6;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      .theme {
+        min-height: 460px;
+        border: 1px solid var(--line);
+        background: var(--paper);
+        padding: 28px;
+      }
+
+      .theme.dark {
+        border-color: var(--dark-line);
+        background: var(--dark-paper);
+        color: var(--dark-ink);
+      }
+
+      .theme-label {
+        margin: 0 0 28px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .dark .theme-label {
+        color: var(--dark-muted);
+      }
+
+      .mock-card {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        padding: 24px;
+      }
+
+      .dark .mock-card {
+        border-color: var(--dark-line);
+        background: var(--dark-panel);
+      }
+
+      .brand {
+        margin: 0 0 44px;
+        font-size: 34px;
+        font-weight: 650;
+        letter-spacing: 0;
+      }
+
+      .mock-title {
+        margin: 0 0 12px;
+        font-size: 22px;
+        line-height: 1.2;
+      }
+
+      .mock-copy {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .dark .mock-copy {
+        color: var(--dark-muted);
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 28px;
+      }
+
+      button {
+        border: 1px solid var(--ink);
+        background: var(--ink);
+        color: var(--paper);
+        min-height: 42px;
+        padding: 0 16px;
+        font: inherit;
+        font-weight: 650;
+      }
+
+      button.secondary {
+        border-color: var(--line);
+        background: transparent;
+        color: var(--ink);
+      }
+
+      .dark button {
+        border-color: var(--dark-ink);
+        background: var(--dark-ink);
+        color: var(--dark-paper);
+      }
+
+      .dark button.secondary {
+        border-color: var(--dark-line);
+        background: transparent;
+        color: var(--dark-ink);
+      }
+
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        margin-top: 24px;
+        border: 1px solid var(--line);
+      }
+
+      .dark .swatches {
+        border-color: var(--dark-line);
+      }
+
+      .swatch {
+        min-height: 92px;
+        padding: 10px;
+        display: flex;
+        align-items: end;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .notes {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .note {
+        border: 1px solid #dad9d6;
+        background: #fdfdfc;
+        padding: 22px;
+      }
+
+      .note h2 {
+        margin: 0 0 10px;
+        font-size: 18px;
+      }
+
+      .note p,
+      .note li {
+        color: #4c4b47;
+        line-height: 1.55;
+      }
+
+      .note ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .states {
+        margin-top: 20px;
+        border: 1px solid #dad9d6;
+        background: #fdfdfc;
+        padding: 22px;
+      }
+
+      .states h2 {
+        margin: 0 0 10px;
+        font-size: 18px;
+      }
+
+      .states p {
+        margin: 0 0 18px;
+        color: #4c4b47;
+        line-height: 1.55;
+      }
+
+      .state-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .state {
+        min-height: 132px;
+        border: 1px solid var(--state-border);
+        background: var(--state-surface);
+        color: var(--state-text);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .state strong {
+        font-size: 15px;
+      }
+
+      .state code {
+        color: inherit;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 760px) {
+        main {
+          padding: 32px 0;
+        }
+
+        .grid,
+        .notes,
+        .state-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Recommended brand direction</p>
+        <h1>Calis</h1>
+        <p class="summary">
+          A quiet, adult, warm-neutral identity. The product should feel composed and private:
+          soft off-white in light mode, near-black in dark mode, restrained contrast, and no
+          decorative accent colors unless a workflow truly needs status feedback.
+        </p>
+      </header>
+
+      <section class="grid" aria-label="Recommended light and dark theme preview">
+        <article class="theme">
+          <p class="theme-label">Light mode</p>
+          <p class="brand">Calis</p>
+          <div class="mock-card">
+            <h2 class="mock-title">Minimal, focused, grown-up.</h2>
+            <p class="mock-copy">
+              Use neutral surfaces, clear typography, and calm spacing. Avoid loud highlights,
+              playful gradients, and oversized decorative UI.
+            </p>
+            <div class="button-row">
+              <button>Continue</button>
+              <button class="secondary">Details</button>
+            </div>
+          </div>
+          <div class="swatches">
+            <div class="swatch" style="background:#fdfdfc;color:#21201c">#FDFDFC</div>
+            <div class="swatch" style="background:#f1f0ef;color:#21201c">#F1F0EF</div>
+            <div class="swatch" style="background:#dad9d6;color:#21201c">#DAD9D6</div>
+            <div class="swatch" style="background:#63635e;color:#fdfdfc">#63635E</div>
+            <div class="swatch" style="background:#21201c;color:#fdfdfc">#21201C</div>
+          </div>
+        </article>
+
+        <article class="theme dark">
+          <p class="theme-label">Dark mode</p>
+          <p class="brand">Calis</p>
+          <div class="mock-card">
+            <h2 class="mock-title">Quiet contrast, not pure black.</h2>
+            <p class="mock-copy">
+              Dark mode should be comfortable for long sessions: layered charcoal surfaces and
+              warm text, without blue-black harshness.
+            </p>
+            <div class="button-row">
+              <button>Continue</button>
+              <button class="secondary">Details</button>
+            </div>
+          </div>
+          <div class="swatches">
+            <div class="swatch" style="background:#111110;color:#eeeeec">#111110</div>
+            <div class="swatch" style="background:#222221;color:#eeeeec">#222221</div>
+            <div class="swatch" style="background:#3b3a37;color:#eeeeec">#3B3A37</div>
+            <div class="swatch" style="background:#b5b3ad;color:#111110">#B5B3AD</div>
+            <div class="swatch" style="background:#eeeeec;color:#111110">#EEEEEC</div>
+          </div>
+        </article>
+      </section>
+
+      <section class="notes" aria-label="Brand notes">
+        <article class="note">
+          <h2>Token set</h2>
+          <ul>
+            <li>Background: Sand 1 light, Sand 1 dark</li>
+            <li>Surface: Sand 3 light, Sand 3 dark</li>
+            <li>Border: Sand 6 light, Sand 6 dark</li>
+            <li>Muted text: Sand 11 light, Sand 11 dark</li>
+            <li>Primary text: Sand 12 light, Sand 12 dark</li>
+          </ul>
+        </article>
+        <article class="note">
+          <h2>Brand behavior</h2>
+          <p>
+            Keep the wordmark simple, text-based, and confident. Use “Calis” in title case,
+            generous whitespace, and neutral surfaces. Let content and interaction quality carry
+            the brand.
+          </p>
+        </article>
+      </section>
+
+      <section class="states" aria-label="Minimal semantic colors">
+        <h2>Minimal semantic colors</h2>
+        <p>
+          These colors are not brand decoration. Use them only for state: destructive actions,
+          confirmations, caution, and keyboard focus or selected controls.
+        </p>
+        <div class="state-grid">
+          <div
+            class="state"
+            style="--state-surface:#feebe7;--state-border:#fdbdaf;--state-text:#d13415">
+            <strong>Danger</strong>
+            <code>#FEEBE7<br />#FDBDAF<br />#D13415</code>
+          </div>
+          <div
+            class="state"
+            style="--state-surface:#e9f6e9;--state-border:#b2ddb5;--state-text:#2a7e3b">
+            <strong>Success</strong>
+            <code>#E9F6E9<br />#B2DDB5<br />#2A7E3B</code>
+          </div>
+          <div
+            class="state"
+            style="--state-surface:#fff7c2;--state-border:#f3d673;--state-text:#ab6400">
+            <strong>Warning</strong>
+            <code>#FFF7C2<br />#F3D673<br />#AB6400</code>
+          </div>
+          <div
+            class="state"
+            style="--state-surface:#e6f4fe;--state-border:#acd8fc;--state-text:#0d74ce">
+            <strong>Focus</strong>
+            <code>#E6F4FE<br />#ACD8FC<br />#0D74CE</code>
+          </div>
+          <div
+            class="state"
+            style="--state-surface:#391714;--state-border:#6e2920;--state-text:#ff977d">
+            <strong>Danger dark</strong>
+            <code>#391714<br />#6E2920<br />#FF977D</code>
+          </div>
+          <div
+            class="state"
+            style="--state-surface:#1b2a1e;--state-border:#2d5736;--state-text:#71d083">
+            <strong>Success dark</strong>
+            <code>#1B2A1E<br />#2D5736<br />#71D083</code>
+          </div>
+          <div
+            class="state"
+            style="--state-surface:#302008;--state-border:#5c3d05;--state-text:#ffca16">
+            <strong>Warning dark</strong>
+            <code>#302008<br />#5C3D05<br />#FFCA16</code>
+          </div>
+          <div
+            class="state"
+            style="--state-surface:#0d2847;--state-border:#104d87;--state-text:#70b8ff">
+            <strong>Focus dark</strong>
+            <code>#0D2847<br />#104D87<br />#70B8FF</code>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
