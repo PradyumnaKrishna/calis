@@ -26,6 +26,10 @@ module.exports = {
           light: '#F1F0EF',
           dark: '#222221',
         },
+        primary: {
+          light: '#21201C',
+          dark: '#EEEEEC',
+        },
         danger: {
           light: '#D13415',
           dark: '#FF977D',
