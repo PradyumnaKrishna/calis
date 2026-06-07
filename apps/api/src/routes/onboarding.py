@@ -4,8 +4,15 @@ from sqlmodel import Session, select
 
 from ..core.database import get_session
 from ..models import QuestionRecord
-from ..schemas import LevelAssessment, LevelRequest, Questionnaire
+from ..schemas import (
+    LevelAssessment,
+    LevelRequest,
+    ProfileCreated,
+    ProfileCreateRequest,
+    Questionnaire,
+)
 from ..services import assess_level
+from ..services.profile import create_profile
 
 router = APIRouter(prefix="/onboarding", tags=["onboarding"])
 
@@ -39,3 +46,17 @@ def level(
     request: LevelRequest, session: Session = Depends(get_session)
 ) -> LevelAssessment:
     return assess_level(session, request.answers)
+
+
+@router.post("/profile", response_model=ProfileCreated)
+def profile(
+    request: ProfileCreateRequest, session: Session = Depends(get_session)
+) -> ProfileCreated:
+    created = create_profile(session, request.answers)
+
+    return ProfileCreated(
+        profile_id=created.id,
+        level=created.level,
+        current_plan_level=created.current_plan_level,
+        current_volume_tier=created.current_volume_tier,
+    )

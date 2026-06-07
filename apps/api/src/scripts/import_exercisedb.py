@@ -140,6 +140,18 @@ def infer_movement_pattern(exercise: dict[str, Any]) -> str:
 def infer_difficulty(exercise: dict[str, Any]) -> int:
     name = exercise["name"].lower()
 
+    if any(
+        hint in name
+        for hint in [
+            "incline push-up",
+            "incline leg hip raise",
+            "incline side plank",
+            "incline twisting sit-up",
+            "suspended row",
+        ]
+    ):
+        return 1
+
     if any(hint in name for hint in ["single arm", "one leg squat", "l-pull", "ring dips", "superman push-up"]):
         return 5
 

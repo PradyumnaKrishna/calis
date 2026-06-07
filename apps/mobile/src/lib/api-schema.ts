@@ -89,10 +89,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/onboarding/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Profile */
+        post: operations["profile_api_v1_onboarding_profile_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Current Plan */
+        get: operations["current_plan_api_v1_plans_current_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/current/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Progress Current Plan */
+        post: operations["progress_current_plan_api_v1_plans_current_progress_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** CurrentPlan */
+        CurrentPlan: {
+            /** Profileid */
+            profileId: string;
+            level: components["schemas"]["Level"];
+            planLevel: components["schemas"]["Level"];
+            volumeTier: components["schemas"]["VolumeTier"];
+            /** Cycledays */
+            cycleDays: number;
+            /** Workouts */
+            workouts: components["schemas"]["PlanWorkout"][];
+        };
         /** ExerciseList */
         ExerciseList: {
             /** Data */
@@ -139,6 +202,64 @@ export interface components {
             answers: {
                 [key: string]: string | string[];
             };
+        };
+        /** PlanExercise */
+        PlanExercise: {
+            /** Exerciseid */
+            exerciseId: string;
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /** Movementpattern */
+            movementPattern: string;
+            /** Sets */
+            sets: number;
+            /** Reps */
+            reps?: string | null;
+            /** Holdseconds */
+            holdSeconds?: string | null;
+            /** Restseconds */
+            restSeconds: number;
+        };
+        /** PlanProgressRequest */
+        PlanProgressRequest: {
+            /**
+             * Result
+             * @enum {string}
+             */
+            result: "completed" | "too_easy" | "too_hard" | "pain" | "skipped";
+        };
+        /** PlanProgressResponse */
+        PlanProgressResponse: {
+            /** Profileid */
+            profileId: string;
+            planLevel: components["schemas"]["Level"];
+            volumeTier: components["schemas"]["VolumeTier"];
+        };
+        /** PlanWorkout */
+        PlanWorkout: {
+            /** Day */
+            day: number;
+            /** Title */
+            title: string;
+            /** Exercises */
+            exercises: components["schemas"]["PlanExercise"][];
+        };
+        /** ProfileCreateRequest */
+        ProfileCreateRequest: {
+            /** Answers */
+            answers: {
+                [key: string]: string | string[];
+            };
+        };
+        /** ProfileCreated */
+        ProfileCreated: {
+            /** Profileid */
+            profileId: string;
+            level: components["schemas"]["Level"];
+            currentPlanLevel: components["schemas"]["Level"];
+            currentVolumeTier: components["schemas"]["VolumeTier"];
         };
         /** Questionnaire */
         Questionnaire: {
@@ -193,6 +314,11 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /**
+         * VolumeTier
+         * @enum {string}
+         */
+        VolumeTier: "low" | "medium" | "high";
     };
     responses: never;
     parameters: never;
@@ -315,6 +441,105 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LevelAssessment"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    profile_api_v1_onboarding_profile_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileCreated"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    current_plan_api_v1_plans_current_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Profile-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CurrentPlan"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    progress_current_plan_api_v1_plans_current_progress_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Profile-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanProgressRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanProgressResponse"];
                 };
             };
             /** @description Validation Error */
