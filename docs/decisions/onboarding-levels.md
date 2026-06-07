@@ -64,7 +64,7 @@ Training frequency alone is weak because it only tells us availability, not abil
    - Current decision: use this as supporting context, not the primary level signal.
 
 4. What equipment do you have access to?
-   - None, pull-up bar, parallel bars, rings.
+   - None, pull-up bar, parallel bars, rings, resistance bands.
    - Why: prevents recommending impossible progressions.
 
 5. Is anything uncomfortable or risky right now?
@@ -88,7 +88,32 @@ Weight training can help interpret the answers, but it should not override calis
 
 ## Deterministic Mapping
 
-The first implementation should map answers into:
+The current implementation sends selected option IDs to the backend:
+
+```json
+{
+  "answers": {
+    "push_ups": "push_5_14",
+    "equipment": ["pullup_bar", "bands"]
+  }
+}
+```
+
+The backend maps those option IDs to server-side option scores and question weights. The level score is the cumulative sum of:
+
+```text
+option.score * question.weight
+```
+
+The response currently returns only the starting level:
+
+```json
+{
+  "level": "intermediate"
+}
+```
+
+Later, when we add profiles and persisted answers, we should map answers into:
 
 - Goal
 - Ability signals
@@ -98,7 +123,7 @@ The first implementation should map answers into:
 - Plan pace
 - Starting level
 
-The level should come mostly from ability signals. Frequency should only affect pacing and volume, not make someone appear more advanced.
+For now, only options with scores affect the level. Goal, frequency, equipment, and constraints can remain unscored until the plan engine uses them.
 
 ## Open Questions
 

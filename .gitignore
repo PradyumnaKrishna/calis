@@ -1,5 +1,8 @@
 # dependencies (bun install)
 node_modules
+.venv
+apps/api/.venv
+__pycache__
 
 # output
 out

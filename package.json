@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "module": "index.ts",
   "scripts": {
-    "dev:api": "bun --cwd apps/api dev",
+    "dev:api": "cd apps/api && python3 -m venv .venv && .venv/bin/pip install -e . && .venv/bin/calis-api-seed && .venv/bin/uvicorn src.main:app --reload --host 0.0.0.0 --port 3001",
     "dev:mobile": "bun --cwd apps/mobile start",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx}\""
@@ -20,7 +20,7 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "apps/*",
+    "apps/mobile",
     "packages/*"
   ]
 }
