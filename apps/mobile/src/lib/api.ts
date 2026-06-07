@@ -1,63 +1,33 @@
-const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:3001';
+import {useMemo} from 'react';
 
-export type QuestionType = 'single' | 'multi';
+import createClient, {type Middleware} from 'openapi-fetch';
 
-export type QuestionnaireOption = {
-  id: string;
-  label: string;
-  score?: number;
-};
+import type {paths} from './api-schema';
 
-export type QuestionnaireStep = {
-  id: string;
-  type: QuestionType;
-  eyebrow: string;
-  question: string;
-  hint: string;
-  minSelections?: number;
-  maxSelections?: number;
-  options: QuestionnaireOption[];
-};
+const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
 
-export type Questionnaire = {
-  id: string;
-  version: number;
-  title: string;
-  description: string;
-  steps: QuestionnaireStep[];
-};
-
-export type Exercise = {
-  id: string;
-  name: string;
-  slug: string;
-  bodyParts: string[];
-  equipment: string[];
-  targetMuscles: string[];
-  secondaryMuscles: string[];
-  instructions: string[];
-  gifUrl: string;
-  localGifPath: string;
-};
-
-export async function fetchOnboardingQuestionnaire(): Promise<Questionnaire> {
-  const response = await fetch(`${apiBaseUrl}/api/v1/onboarding/questionnaire`);
-
-  if (!response.ok) {
-    throw new Error('Unable to load onboarding questionnaire.');
-  }
-
-  return response.json() as Promise<Questionnaire>;
+if (!apiBaseUrl) {
+  throw new Error('Missing EXPO_PUBLIC_API_BASE_URL.');
 }
 
-export async function fetchExercises(): Promise<Exercise[]> {
-  const response = await fetch(`${apiBaseUrl}/api/v1/exercises`);
+const baseUrl = apiBaseUrl.replace(/\/+$/, '');
 
-  if (!response.ok) {
-    throw new Error('Unable to load exercises.');
-  }
+const middleware: Middleware = {
+  async onRequest({request}) {
+    request.headers.set('Accept', 'application/json');
 
-  const payload = (await response.json()) as {data: Exercise[]};
+    return request;
+  },
+};
 
-  return payload.data;
+function createApi() {
+  const client = createClient<paths>({baseUrl});
+
+  client.use(middleware);
+
+  return client;
+}
+
+export function useApi() {
+  return useMemo(() => createApi(), []);
 }

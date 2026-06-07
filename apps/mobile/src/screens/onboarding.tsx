@@ -1,45 +1,24 @@
-import {useRef, useState} from 'react';
+import { useState } from 'react';
 
-import {Pressable, ScrollView, Text, View} from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
-import {useQuery} from '@tanstack/react-query';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import {NativeWindFeather} from '../components/nativewind-feather';
-import {OnboardingHint} from '../components/onboarding/hint';
-import {ProgressBar} from '../components/progress-bar';
-import {type QuestionnaireStep, fetchOnboardingQuestionnaire} from '../lib/api';
+import { NativeWindFeather } from '../components/nativewind-feather';
+import { OnboardingHint } from '../components/onboarding/hint';
+import { ProgressBar } from '../components/progress-bar';
+import { useApi } from '../lib/api';
+import type { components } from '../lib/api-schema';
 
-type AnswerValue = string | string[];
-
-function hasStepAnswer(step: QuestionnaireStep, answers: Record<string, AnswerValue>) {
-  const answer = answers[step.id];
-
-  if (step.type === 'single') {
-    return typeof answer === 'string';
-  }
-
-  return Array.isArray(answer) && answer.length >= (step.minSelections ?? 0);
-}
-
-function toggleMultiChoice(currentAnswer: AnswerValue | undefined, optionId: string) {
-  const selectedIds = Array.isArray(currentAnswer) ? currentAnswer : [];
-
-  if (optionId === 'none') {
-    return selectedIds.includes(optionId) ? [] : [optionId];
-  }
-
-  const selectableIds = selectedIds.filter((selectedId) => selectedId !== 'none');
-
-  return selectableIds.includes(optionId)
-    ? selectableIds.filter((selectedId) => selectedId !== optionId)
-    : [...selectableIds, optionId];
-}
+type Answers = components['schemas']['LevelRequest']['answers'];
 
 export function OnboardingScreen() {
+  const api = useApi();
+  const router = useRouter();
   const [stepIndex, setStepIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
-  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [answers, setAnswers] = useState<Answers>({});
   const {
     data: questionnaire,
     isError,
@@ -47,7 +26,35 @@ export function OnboardingScreen() {
     refetch,
   } = useQuery({
     queryKey: ['onboarding-questionnaire'],
-    queryFn: fetchOnboardingQuestionnaire,
+    queryFn: async () => {
+      const { data, error } = await api.GET('/api/v1/onboarding/questionnaire');
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+  });
+
+  const submit = useMutation({
+    mutationFn: async (nextAnswers: Answers) => {
+      const { data, error } = await api.POST('/api/v1/onboarding/level', {
+        body: { answers: nextAnswers },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: (levelAssessment) => {
+      router.replace({
+        pathname: '/onboarded' as never,
+        params: { level: levelAssessment.level },
+      });
+    },
   });
 
   if (isLoading) {
@@ -72,7 +79,8 @@ export function OnboardingScreen() {
           <Pressable
             accessibilityRole="button"
             className="h-12 w-32 items-center justify-center rounded-full bg-foreground-light dark:bg-foreground-dark"
-            onPress={() => refetch()}>
+            onPress={() => refetch()}
+          >
             <Text className="text-base font-semibold text-background-light dark:text-background-dark">
               Retry
             </Text>
@@ -85,44 +93,49 @@ export function OnboardingScreen() {
   const steps = questionnaire.steps;
   const step = steps[stepIndex];
   const selected = answers[step.id];
-  const progress = (stepIndex + 1) / steps.length;
   const isLastStep = stepIndex === steps.length - 1;
-  const canContinue = hasStepAnswer(step, answers);
+  const isFullfilled =
+    step.type === 'single'
+      ? typeof selected === 'string'
+      : Array.isArray(selected) && selected.length >= (step.minSelections ?? 0);
+
+  function goBack() {
+    setStepIndex((current) => Math.max(0, current - 1));
+  }
+
+  function continueToNextStep() {
+    if (step.type === 'multi' && !isFullfilled) {
+      return;
+    }
+
+    if (isLastStep) {
+      submit.mutate(answers);
+    } else {
+      setStepIndex((current) => current + 1);
+    }
+  }
 
   function selectOption(optionId: string) {
     if (step.type === 'multi') {
       setAnswers((current) => {
-        return {...current, [step.id]: toggleMultiChoice(current[step.id], optionId)};
+        const currentAnswer = current[step.id];
+        const selectedIds = Array.isArray(currentAnswer) ? currentAnswer : [];
+        let nextSelectedIds: string[];
+
+        if (selectedIds.includes(optionId)) {
+          nextSelectedIds = selectedIds.filter((selectedId) => selectedId !== optionId);
+        } else if (selectedIds.length >= (step.maxSelections ?? step.options.length)) {
+          nextSelectedIds = selectedIds;
+        } else {
+          nextSelectedIds = [...selectedIds, optionId];
+        }
+
+        return { ...current, [step.id]: nextSelectedIds };
       });
-
-      return;
+    } else {
+      setAnswers({ ...answers, [step.id]: optionId });
+      continueToNextStep();
     }
-
-    setAnswers((current) => ({...current, [step.id]: optionId}));
-
-    if (isLastStep) {
-      return;
-    }
-
-    if (advanceTimer.current) {
-      clearTimeout(advanceTimer.current);
-    }
-
-    advanceTimer.current = setTimeout(() => {
-      setStepIndex((current) => Math.min(current + 1, steps.length - 1));
-    }, 180);
-  }
-
-  function continueToNextStep() {
-    if (!canContinue || isLastStep) {
-      return;
-    }
-
-    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
-  }
-
-  function goBack() {
-    setStepIndex((current) => Math.max(0, current - 1));
   }
 
   return (
@@ -134,7 +147,8 @@ export function OnboardingScreen() {
               accessibilityLabel="Go back"
               accessibilityRole="button"
               className="h-10 w-10 items-center justify-center"
-              onPress={goBack}>
+              onPress={goBack}
+            >
               <NativeWindFeather
                 className="text-primary-light dark:text-primary-dark"
                 name="arrow-left"
@@ -142,13 +156,14 @@ export function OnboardingScreen() {
               />
             </Pressable>
           ) : null}
-          <ProgressBar value={progress} />
+          <ProgressBar value={(stepIndex + 1) / steps.length} />
         </View>
 
         <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="pb-6">
+          contentContainerClassName="pb-6"
+        >
           <Text className="mb-3 text-xs font-semibold uppercase text-muted-light dark:text-muted-dark">
             {step.eyebrow}
           </Text>
@@ -165,22 +180,25 @@ export function OnboardingScreen() {
               return (
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityState={{selected: isSelected}}
+                  accessibilityState={{ disabled: submit.isPending, selected: isSelected }}
                   className={[
                     'min-h-12 w-full max-w-sm items-center justify-center self-start rounded-full border px-6 py-3',
                     isSelected
                       ? 'border-foreground-light bg-foreground-light dark:border-foreground-dark dark:bg-foreground-dark'
                       : 'border-border-light bg-background-light dark:border-border-dark dark:bg-background-dark',
                   ].join(' ')}
+                  disabled={submit.isPending}
                   key={option.id}
-                  onPress={() => selectOption(option.id)}>
+                  onPress={() => selectOption(option.id)}
+                >
                   <Text
                     className={[
                       'text-center text-base font-semibold',
                       isSelected
                         ? 'text-background-light dark:text-background-dark'
                         : 'text-foreground-light dark:text-foreground-dark',
-                    ].join(' ')}>
+                    ].join(' ')}
+                  >
                     {option.label}
                   </Text>
                 </Pressable>
@@ -188,22 +206,36 @@ export function OnboardingScreen() {
             })}
           </View>
 
+          {step.type === 'single' && submit.isPending ? (
+            <View className="mt-8 flex-row items-center gap-3">
+              <ActivityIndicator color="#63635E" />
+              <Text className="text-base font-semibold text-muted-light dark:text-muted-dark">
+                Saving...
+              </Text>
+            </View>
+          ) : null}
+
           {step.type === 'multi' ? (
             <View className="mt-8 w-full max-w-sm flex-row justify-end">
               <Pressable
                 accessibilityRole="button"
-                accessibilityState={{disabled: !canContinue}}
+                accessibilityState={{ disabled: !isFullfilled }}
                 className={[
                   'h-12 w-36 items-center justify-center rounded-full',
-                  canContinue
+                  isFullfilled && !submit.isPending
                     ? 'bg-foreground-light dark:bg-foreground-dark'
                     : 'bg-border-light dark:bg-border-dark',
                 ].join(' ')}
-                disabled={!canContinue}
-                onPress={continueToNextStep}>
-                <Text className="text-base font-semibold text-background-light dark:text-background-dark">
-                  {isLastStep ? 'Finish' : 'Continue'}
-                </Text>
+                disabled={!isFullfilled || submit.isPending}
+                onPress={continueToNextStep}
+              >
+                {submit.isPending ? (
+                  <ActivityIndicator color="#FDFDFC" />
+                ) : (
+                  <Text className="text-base font-semibold text-background-light dark:text-background-dark">
+                    {isLastStep ? 'Finish' : 'Continue'}
+                  </Text>
+                )}
               </Pressable>
             </View>
           ) : null}

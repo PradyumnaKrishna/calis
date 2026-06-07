@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import ConfigDict, Field
 from sqlmodel import SQLModel
 
@@ -14,7 +16,7 @@ class QuestionnaireStep(SQLModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
     id: str
-    type: str
+    type: Literal["single", "multi"]
     weight: float
     eyebrow: str
     question: str
@@ -25,7 +27,7 @@ class QuestionnaireStep(SQLModel):
     max_selections: int | None = Field(
         default=None, serialization_alias="maxSelections"
     )
-    options: list[QuestionnaireOption] = Field(default_factory=list)
+    options: list[QuestionnaireOption]
 
 
 class Questionnaire(SQLModel):
