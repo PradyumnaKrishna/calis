@@ -55,3 +55,24 @@ model QuestionnaireOption {
   @@unique([questionnaireId, stepId, position])
   @@map("questionnaire_options")
 }
+
+model Exercise {
+  id                   String   @id
+  source               String
+  sourceExerciseId     String   @unique @map("source_exercise_id")
+  name                 String
+  slug                 String   @unique
+  bodyPartsJson        String   @map("body_parts_json")
+  equipmentJson        String   @map("equipment_json")
+  targetMusclesJson    String   @map("target_muscles_json")
+  secondaryMusclesJson String   @map("secondary_muscles_json")
+  instructionsJson     String   @map("instructions_json")
+  gifUrl               String   @map("gif_url")
+  localGifPath         String   @map("local_gif_path")
+  rawJson              String   @map("raw_json")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@index([name])
+  @@map("exercises")
+}

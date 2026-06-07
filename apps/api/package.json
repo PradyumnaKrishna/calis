@@ -10,6 +10,7 @@
     "db:deploy": "bun scripts/ensure-sqlite.ts && DATABASE_URL=file:./.data/calis.sqlite prisma migrate deploy",
     "db:setup": "bun run db:deploy && bun run db:seed",
     "db:seed": "DATABASE_URL=file:./prisma/.data/calis.sqlite bun prisma/seed/index.ts",
+    "import:exercises": "bun scripts/import-exercisedb.ts",
     "start": "bun run db:deploy && DATABASE_URL=file:./prisma/.data/calis.sqlite bun src/server.ts",
     "typecheck": "tsc --noEmit"
   },

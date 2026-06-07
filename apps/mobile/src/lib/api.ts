@@ -27,6 +27,19 @@ export type Questionnaire = {
   steps: QuestionnaireStep[];
 };
 
+export type Exercise = {
+  id: string;
+  name: string;
+  slug: string;
+  bodyParts: string[];
+  equipment: string[];
+  targetMuscles: string[];
+  secondaryMuscles: string[];
+  instructions: string[];
+  gifUrl: string;
+  localGifPath: string;
+};
+
 export async function fetchOnboardingQuestionnaire(): Promise<Questionnaire> {
   const response = await fetch(`${apiBaseUrl}/api/v1/onboarding/questionnaire`);
 
@@ -35,4 +48,16 @@ export async function fetchOnboardingQuestionnaire(): Promise<Questionnaire> {
   }
 
   return response.json() as Promise<Questionnaire>;
+}
+
+export async function fetchExercises(): Promise<Exercise[]> {
+  const response = await fetch(`${apiBaseUrl}/api/v1/exercises`);
+
+  if (!response.ok) {
+    throw new Error('Unable to load exercises.');
+  }
+
+  const payload = (await response.json()) as {data: Exercise[]};
+
+  return payload.data;
 }
