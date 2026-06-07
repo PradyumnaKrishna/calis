@@ -1,22 +1,24 @@
-import { useState } from 'react';
+import {useState} from 'react';
 
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import {ActivityIndicator, Pressable, ScrollView, Text, View} from 'react-native';
 
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {useRouter} from 'expo-router';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
-import { NativeWindFeather } from '../components/nativewind-feather';
-import { OnboardingHint } from '../components/onboarding/hint';
-import { ProgressBar } from '../components/progress-bar';
-import { useApi } from '../lib/api';
-import type { components } from '../lib/api-schema';
+import {NativeWindFeather} from '../components/nativewind-feather';
+import {OnboardingHint} from '../components/onboarding/hint';
+import {ProgressBar} from '../components/progress-bar';
+import {useApi} from '../lib/api';
+import type {components} from '../lib/api-schema';
+import {storeProfileId} from '../lib/profile-storage';
 
 type Answers = components['schemas']['LevelRequest']['answers'];
 
 export function OnboardingScreen() {
   const api = useApi();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const {
@@ -27,7 +29,7 @@ export function OnboardingScreen() {
   } = useQuery({
     queryKey: ['onboarding-questionnaire'],
     queryFn: async () => {
-      const { data, error } = await api.GET('/api/v1/onboarding/questionnaire');
+      const {data, error} = await api.GET('/api/v1/onboarding/questionnaire');
 
       if (error) {
         throw error;
@@ -39,8 +41,8 @@ export function OnboardingScreen() {
 
   const submit = useMutation({
     mutationFn: async (nextAnswers: Answers) => {
-      const { data, error } = await api.POST('/api/v1/onboarding/level', {
-        body: { answers: nextAnswers },
+      const {data, error} = await api.POST('/api/v1/onboarding/profile', {
+        body: {answers: nextAnswers},
       });
 
       if (error) {
@@ -49,10 +51,16 @@ export function OnboardingScreen() {
 
       return data;
     },
-    onSuccess: (levelAssessment) => {
+    onSuccess: async (profile) => {
+      await storeProfileId(profile.profileId);
+      queryClient.setQueryData(['stored-profile-id'], profile.profileId);
       router.replace({
         pathname: '/onboarded' as never,
-        params: { level: levelAssessment.level },
+        params: {
+          onboarded: 'true',
+          level: profile.level,
+          profileId: profile.profileId,
+        },
       });
     },
   });
@@ -79,8 +87,7 @@ export function OnboardingScreen() {
           <Pressable
             accessibilityRole="button"
             className="h-12 w-32 items-center justify-center rounded-full bg-foreground-light dark:bg-foreground-dark"
-            onPress={() => refetch()}
-          >
+            onPress={() => refetch()}>
             <Text className="text-base font-semibold text-background-light dark:text-background-dark">
               Retry
             </Text>
@@ -130,11 +137,18 @@ export function OnboardingScreen() {
           nextSelectedIds = [...selectedIds, optionId];
         }
 
-        return { ...current, [step.id]: nextSelectedIds };
+        return {...current, [step.id]: nextSelectedIds};
       });
     } else {
-      setAnswers({ ...answers, [step.id]: optionId });
-      continueToNextStep();
+      const nextAnswers = {...answers, [step.id]: optionId};
+
+      setAnswers(nextAnswers);
+
+      if (isLastStep) {
+        submit.mutate(nextAnswers);
+      } else {
+        setStepIndex((current) => current + 1);
+      }
     }
   }
 
@@ -147,8 +161,7 @@ export function OnboardingScreen() {
               accessibilityLabel="Go back"
               accessibilityRole="button"
               className="h-10 w-10 items-center justify-center"
-              onPress={goBack}
-            >
+              onPress={goBack}>
               <NativeWindFeather
                 className="text-primary-light dark:text-primary-dark"
                 name="arrow-left"
@@ -162,8 +175,7 @@ export function OnboardingScreen() {
         <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="pb-6"
-        >
+          contentContainerClassName="pb-6">
           <Text className="mb-3 text-xs font-semibold uppercase text-muted-light dark:text-muted-dark">
             {step.eyebrow}
           </Text>
@@ -180,7 +192,7 @@ export function OnboardingScreen() {
               return (
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityState={{ disabled: submit.isPending, selected: isSelected }}
+                  accessibilityState={{disabled: submit.isPending, selected: isSelected}}
                   className={[
                     'min-h-12 w-full max-w-sm items-center justify-center self-start rounded-full border px-6 py-3',
                     isSelected
@@ -189,16 +201,14 @@ export function OnboardingScreen() {
                   ].join(' ')}
                   disabled={submit.isPending}
                   key={option.id}
-                  onPress={() => selectOption(option.id)}
-                >
+                  onPress={() => selectOption(option.id)}>
                   <Text
                     className={[
                       'text-center text-base font-semibold',
                       isSelected
                         ? 'text-background-light dark:text-background-dark'
                         : 'text-foreground-light dark:text-foreground-dark',
-                    ].join(' ')}
-                  >
+                    ].join(' ')}>
                     {option.label}
                   </Text>
                 </Pressable>
@@ -219,7 +229,7 @@ export function OnboardingScreen() {
             <View className="mt-8 w-full max-w-sm flex-row justify-end">
               <Pressable
                 accessibilityRole="button"
-                accessibilityState={{ disabled: !isFullfilled }}
+                accessibilityState={{disabled: !isFullfilled}}
                 className={[
                   'h-12 w-36 items-center justify-center rounded-full',
                   isFullfilled && !submit.isPending
@@ -227,8 +237,7 @@ export function OnboardingScreen() {
                     : 'bg-border-light dark:bg-border-dark',
                 ].join(' ')}
                 disabled={!isFullfilled || submit.isPending}
-                onPress={continueToNextStep}
-              >
+                onPress={continueToNextStep}>
                 {submit.isPending ? (
                   <ActivityIndicator color="#FDFDFC" />
                 ) : (
