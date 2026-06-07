@@ -1,0 +1,8 @@
+node_modules
+bun.lock
+dist
+out
+coverage
+.expo
+apps/api/prisma/.data
+apps/api/.data

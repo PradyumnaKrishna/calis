@@ -1,12 +1,13 @@
-import type { PropsWithChildren } from 'react';
-import { Modal, Pressable, View } from 'react-native';
+import type {PropsWithChildren} from 'react';
+
+import {Modal, Pressable, View} from 'react-native';
 
 type BottomSheetProps = PropsWithChildren<{
   isOpen: boolean;
   onClose: () => void;
 }>;
 
-export function BottomSheet({ children, isOpen, onClose }: BottomSheetProps) {
+export function BottomSheet({children, isOpen, onClose}: BottomSheetProps) {
   return (
     <Modal animationType="slide" transparent visible={isOpen} onRequestClose={onClose}>
       <View className="flex-1 justify-end">

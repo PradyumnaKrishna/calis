@@ -27,6 +27,10 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .cache
 *.tsbuildinfo
 
+# local app data
+apps/api/.data
+apps/api/prisma/.data
+
 # IntelliJ based IDEs
 .idea
 
