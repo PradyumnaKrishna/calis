@@ -109,34 +109,21 @@ export function ExerciseCard({exercise, isComplete, onToggleComplete}: ExerciseC
         </View>
       ) : null}
 
-      <Pressable
-        accessibilityRole="button"
-        className={[
-          'mt-4 h-12 flex-row items-center justify-center gap-2 rounded-full',
-          isComplete
-            ? 'border border-success-border-light bg-background-light dark:border-success-border-dark dark:bg-background-dark'
-            : 'bg-foreground-light dark:bg-foreground-dark',
-        ].join(' ')}
-        onPress={() => onToggleComplete(exercise.exerciseId)}>
-        <NativeWindFeather
-          className={
-            isComplete
-              ? 'text-success-light dark:text-success-dark'
-              : 'text-background-light dark:text-background-dark'
-          }
-          name={isComplete ? 'rotate-ccw' : 'check'}
-          size={18}
-        />
-        <Text
-          className={[
-            'text-base font-black',
-            isComplete
-              ? 'text-success-light dark:text-success-dark'
-              : 'text-background-light dark:text-background-dark',
-          ].join(' ')}>
-          {isComplete ? 'Mark not done' : 'Mark complete'}
-        </Text>
-      </Pressable>
+      {!isComplete ? (
+        <Pressable
+          accessibilityRole="button"
+          className="mt-4 h-12 flex-row items-center justify-center gap-2 rounded-full bg-foreground-light dark:bg-foreground-dark"
+          onPress={() => onToggleComplete(exercise.exerciseId)}>
+          <NativeWindFeather
+            className="text-background-light dark:text-background-dark"
+            name="check"
+            size={18}
+          />
+          <Text className="text-base font-black text-background-light dark:text-background-dark">
+            Mark complete
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
