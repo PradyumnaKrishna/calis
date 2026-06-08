@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -14,6 +14,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def add_profile_context(request: Request, call_next):
+    request.state.profile_id = request.headers.get("X-Profile-Id")
+
+    return await call_next(request)
+
 
 app.mount("/media", StaticFiles(directory=API_ROOT / "public" / "media"), name="media")
 app.include_router(api_router)

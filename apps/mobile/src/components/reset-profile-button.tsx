@@ -16,6 +16,9 @@ export function ResetProfileButton({label = 'Onboard again'}: ResetProfileButton
   async function resetProfile() {
     await clearStoredProfileId();
     queryClient.setQueryData(['stored-profile-id'], null);
+    queryClient.removeQueries({queryKey: ['profile']});
+    queryClient.removeQueries({queryKey: ['plan']});
+    queryClient.removeQueries({queryKey: ['today-plan']});
     router.replace('/' as never);
   }
 

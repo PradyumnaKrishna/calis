@@ -54,7 +54,7 @@ export default function OnboardingScreen() {
     onSuccess: async (profile) => {
       await storeProfileId(profile.profileId);
       queryClient.setQueryData(['stored-profile-id'], profile.profileId);
-      queryClient.setQueryData(['profile', profile.profileId], profile);
+      queryClient.setQueryData(['profile'], profile);
       router.replace('/' as never);
     },
   });

@@ -40,7 +40,7 @@ export default function HomeScreen() {
   }
 
   if (profileId) {
-    return <DashboardScreen profileId={profileId} />;
+    return <DashboardScreen />;
   }
 
   return (
@@ -99,11 +99,7 @@ function exercisePrescription(exercise: PlanExercise) {
   return `${exercise.sets} sets x ${exercise.reps ?? 'steady'} reps`;
 }
 
-type DashboardScreenProps = {
-  profileId: string;
-};
-
-function DashboardScreen({profileId}: DashboardScreenProps) {
+function DashboardScreen() {
   const api = useApi();
   const router = useRouter();
   const [selectedDay, setSelectedDay] = useState(todayAsPlanDay);
@@ -114,13 +110,9 @@ function DashboardScreen({profileId}: DashboardScreenProps) {
     isLoading: isFullPlanLoading,
     refetch: refetchFullPlan,
   } = useQuery({
-    queryKey: ['plan', profileId],
+    queryKey: ['plan'],
     queryFn: async () => {
-      const {data, error} = await api.GET('/api/v1/plans', {
-        params: {
-          header: {'X-Profile-Id': profileId},
-        },
-      });
+      const {data, error} = await api.GET('/api/v1/plans');
 
       if (error) {
         throw error;
@@ -136,13 +128,9 @@ function DashboardScreen({profileId}: DashboardScreenProps) {
     isLoading: isProfileLoading,
     refetch: refetchProfile,
   } = useQuery({
-    queryKey: ['profile', profileId],
+    queryKey: ['profile'],
     queryFn: async () => {
-      const {data, error} = await api.GET('/api/v1/profile', {
-        params: {
-          header: {'X-Profile-Id': profileId},
-        },
-      });
+      const {data, error} = await api.GET('/api/v1/profile');
 
       if (error) {
         throw error;
@@ -165,13 +153,9 @@ function DashboardScreen({profileId}: DashboardScreenProps) {
     isLoading: isTodayPlanLoading,
     refetch: refetchTodayPlan,
   } = useQuery({
-    queryKey: ['today-plan', profileId],
+    queryKey: ['today-plan'],
     queryFn: async () => {
-      const {data, error} = await api.GET('/api/v1/plans/today', {
-        params: {
-          header: {'X-Profile-Id': profileId},
-        },
-      });
+      const {data, error} = await api.GET('/api/v1/plans/today');
 
       if (error) {
         throw error;

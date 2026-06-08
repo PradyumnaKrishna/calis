@@ -34,7 +34,7 @@ export default function PlanRoute() {
   }, [isLoading, profileId, router]);
 
   if (profileId) {
-    return <PlanContent profileId={profileId} />;
+    return <PlanContent />;
   }
 
   if (isLoading) {
@@ -59,11 +59,7 @@ export default function PlanRoute() {
   );
 }
 
-type PlanContentProps = {
-  profileId: string;
-};
-
-function PlanContent({profileId}: PlanContentProps) {
+function PlanContent() {
   const api = useApi();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -78,13 +74,9 @@ function PlanContent({profileId}: PlanContentProps) {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ['today-plan', profileId],
+    queryKey: ['today-plan'],
     queryFn: async () => {
-      const {data, error} = await api.GET('/api/v1/plans/today', {
-        params: {
-          header: {'X-Profile-Id': profileId},
-        },
-      });
+      const {data, error} = await api.GET('/api/v1/plans/today');
 
       if (error) {
         throw error;
@@ -101,9 +93,6 @@ function PlanContent({profileId}: PlanContentProps) {
     mutationFn: async (exerciseId: string) => {
       const {data, error} = await api.POST('/api/v1/plans/today', {
         body: {exerciseId},
-        params: {
-          header: {'X-Profile-Id': profileId},
-        },
       });
 
       if (error) {
@@ -113,9 +102,9 @@ function PlanContent({profileId}: PlanContentProps) {
       return data;
     },
     onSuccess: (nextPlan) => {
-      queryClient.setQueryData(['today-plan', profileId], nextPlan);
-      queryClient.invalidateQueries({queryKey: ['plan', profileId]});
-      queryClient.invalidateQueries({queryKey: ['profile', profileId]});
+      queryClient.setQueryData(['today-plan'], nextPlan);
+      queryClient.invalidateQueries({queryKey: ['plan']});
+      queryClient.invalidateQueries({queryKey: ['profile']});
     },
   });
 

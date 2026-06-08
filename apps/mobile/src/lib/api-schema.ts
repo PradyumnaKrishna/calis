@@ -468,9 +468,7 @@ export interface operations {
   plan_api_v1_plans_get: {
     parameters: {
       query?: never;
-      header: {
-        'X-Profile-Id': string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -485,23 +483,12 @@ export interface operations {
           'application/json': components['schemas']['CurrentPlan'];
         };
       };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['HTTPValidationError'];
-        };
-      };
     };
   };
   today_plan_api_v1_plans_today_get: {
     parameters: {
       query?: never;
-      header: {
-        'X-Profile-Id': string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -516,23 +503,12 @@ export interface operations {
           'application/json': components['schemas']['TodayPlan'] | null;
         };
       };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['HTTPValidationError'];
-        };
-      };
     };
   };
   complete_today_plan_api_v1_plans_today_post: {
     parameters: {
       query?: never;
-      header: {
-        'X-Profile-Id': string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -565,9 +541,7 @@ export interface operations {
   profile_api_v1_profile_get: {
     parameters: {
       query?: never;
-      header: {
-        'X-Profile-Id': string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -580,15 +554,6 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['ProfilePublic'];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['HTTPValidationError'];
         };
       };
     };
