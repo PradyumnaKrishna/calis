@@ -81,9 +81,7 @@ WORKOUT_DAYS = {
 
 
 def generate_current_plan(session: Session, profile: Profile) -> CurrentPlan:
-    frequency = _normalized_frequency(profile.training_days)
     catalog = _load_plan_catalog(session, profile)
-    workouts = _build_workouts(profile, frequency, catalog)
 
     return CurrentPlan(
         profile_id=profile.id,
@@ -91,21 +89,43 @@ def generate_current_plan(session: Session, profile: Profile) -> CurrentPlan:
         plan_level=profile.current_plan_level,
         volume_tier=profile.current_volume_tier,
         cycle_days=7,
-        workouts=workouts,
+        workouts=_build_workouts(
+            profile=profile,
+            catalog=catalog,
+            frequency=_normalized_frequency(profile.training_days),
+        ),
     )
 
 
 def get_current_plan(session: Session, profile: Profile) -> CurrentPlan:
     snapshot = session.get(PlanSnapshot, profile.id)
 
-    if (
-        snapshot is not None
-        and snapshot.plan_level == profile.current_plan_level
-        and snapshot.volume_tier == profile.current_volume_tier
-    ):
+    if _snapshot_matches_profile(snapshot, profile):
         return CurrentPlan.model_validate(snapshot.plan_data)
 
     plan = generate_current_plan(session, profile)
+    _save_plan_snapshot(session, profile, plan, snapshot)
+
+    return plan
+
+
+def _snapshot_matches_profile(
+    snapshot: PlanSnapshot | None,
+    profile: Profile,
+) -> bool:
+    return (
+        snapshot is not None
+        and snapshot.plan_level == profile.current_plan_level
+        and snapshot.volume_tier == profile.current_volume_tier
+    )
+
+
+def _save_plan_snapshot(
+    session: Session,
+    profile: Profile,
+    plan: CurrentPlan,
+    snapshot: PlanSnapshot | None,
+) -> None:
     plan_data = plan.model_dump(mode="json")
 
     if snapshot is None:
@@ -123,8 +143,7 @@ def get_current_plan(session: Session, profile: Profile) -> CurrentPlan:
 
     session.add(snapshot)
     session.commit()
-
-    return plan
+    session.refresh(snapshot)
 
 
 def _normalized_frequency(training_days: int) -> int:
@@ -132,9 +151,11 @@ def _normalized_frequency(training_days: int) -> int:
 
 
 def _load_plan_catalog(session: Session, profile: Profile) -> PlanCatalog:
+    plan_level = profile.current_plan_level
+
     return PlanCatalog(
-        primary=_catalog_for_levels(session, _primary_levels(profile.current_plan_level)),
-        exposure=_exposure_catalog(session, profile),
+        primary=_list_exercises_for_levels(session, _primary_levels(plan_level)),
+        exposure=_list_exercises_for_exposure(session, profile),
     )
 
 
@@ -145,31 +166,38 @@ def _primary_levels(level: Level) -> list[Level]:
     return [level, previous_level(level)]
 
 
-def _exposure_catalog(session: Session, profile: Profile) -> list[Exercise]:
+def _list_exercises_for_exposure(session: Session, profile: Profile) -> list[Exercise]:
     if profile.current_volume_tier != VolumeTier.HIGH:
         return []
 
-    return _catalog_for_levels(session, [next_level(profile.current_plan_level)])
+    return _list_exercises_for_levels(
+        session,
+        [next_level(profile.current_plan_level)],
+    )
 
 
-def _catalog_for_levels(session: Session, levels: list[Level]) -> list[Exercise]:
-    return session.exec(
+def _list_exercises_for_levels(session: Session, levels: list[Level]) -> list[Exercise]:
+    statement = (
         select(Exercise)
         .where(Exercise.level.in_([level.value for level in levels]))
         .order_by(Exercise.difficulty, Exercise.name)
-    ).all()
+    )
+
+    return list(session.exec(statement).all())
 
 
 def _build_workouts(
     profile: Profile,
-    frequency: int,
     catalog: PlanCatalog,
+    frequency: int,
 ) -> list[PlanWorkout]:
     exposure_ids: set[str] = set()
+    templates = WORKOUT_TEMPLATES[frequency]
+    days = WORKOUT_DAYS[frequency]
 
     return [
         PlanWorkout(
-            day=WORKOUT_DAYS[frequency][index],
+            day=days[index],
             title=template.title,
             exercises=_build_workout_exercises(
                 template=template,
@@ -179,7 +207,7 @@ def _build_workouts(
                 exposure_ids=exposure_ids,
             ),
         )
-        for index, template in enumerate(WORKOUT_TEMPLATES[frequency])
+        for index, template in enumerate(templates)
     ]
 
 
@@ -191,28 +219,29 @@ def _build_workout_exercises(
     exposure_ids: set[str],
 ) -> list[PlanExercise]:
     used_ids: set[str] = set()
-    exercises = [
-        _plan_exercise(exercise, tier)
-        for pattern in template.patterns
-        if (
-            exercise := _pick_exercise(
-                pattern=pattern,
-                catalog=catalog.primary,
-                used_ids=used_ids,
-                constraints=constraints,
-            )
-        )
-    ]
+    exercises: list[PlanExercise] = []
 
-    if tier == VolumeTier.HIGH:
-        exposure = _pick_exposure_exercise(
-            catalog=catalog.exposure,
-            used_ids=used_ids | exposure_ids,
+    for pattern in template.patterns:
+        exercise = _pick_exercise(
+            pattern=pattern,
+            catalog=catalog.primary,
+            used_ids=used_ids,
             constraints=constraints,
         )
-        if exposure is not None:
-            exposure_ids.add(exposure.id)
-            exercises.append(_plan_exercise(exposure, VolumeTier.LOW))
+
+        if exercise is not None:
+            exercises.append(_to_plan_exercise(exercise, tier))
+
+    exposure = _pick_exposure_exercise(
+        catalog=catalog.exposure,
+        used_ids=used_ids | exposure_ids,
+        constraints=constraints,
+        enabled=tier == VolumeTier.HIGH,
+    )
+
+    if exposure is not None:
+        exposure_ids.add(exposure.id)
+        exercises.append(_to_plan_exercise(exposure, VolumeTier.LOW))
 
     return exercises
 
@@ -235,7 +264,11 @@ def _pick_exposure_exercise(
     catalog: list[Exercise],
     used_ids: set[str],
     constraints: list[str],
+    enabled: bool,
 ) -> Exercise | None:
+    if not enabled:
+        return None
+
     return _pick_first_available(
         catalog=catalog,
         used_ids=used_ids,
@@ -253,10 +286,13 @@ def _pick_first_available(
         if exercise.id in used_ids:
             continue
 
-        if movement_pattern is not None and exercise.movement_pattern != movement_pattern:
+        if (
+            movement_pattern is not None
+            and exercise.movement_pattern != movement_pattern
+        ):
             continue
 
-        if _blocked_by_constraint(exercise, constraints):
+        if _is_blocked_by_constraints(exercise, constraints):
             continue
 
         used_ids.add(exercise.id)
@@ -265,7 +301,7 @@ def _pick_first_available(
     return None
 
 
-def _blocked_by_constraint(exercise: Exercise, constraints: list[str]) -> bool:
+def _is_blocked_by_constraints(exercise: Exercise, constraints: list[str]) -> bool:
     if "knees" in constraints and exercise.movement_pattern == "squat":
         return True
 
@@ -278,9 +314,9 @@ def _blocked_by_constraint(exercise: Exercise, constraints: list[str]) -> bool:
     return False
 
 
-def _plan_exercise(exercise: Exercise, tier: VolumeTier) -> PlanExercise:
+def _to_plan_exercise(exercise: Exercise, tier: VolumeTier) -> PlanExercise:
     volume = VOLUME_PRESCRIPTIONS[tier]
-    is_hold = "plank" in exercise.name.lower() or "hang" in exercise.name.lower()
+    is_hold = _is_hold_exercise(exercise)
 
     return PlanExercise(
         exercise_id=exercise.id,
@@ -294,3 +330,9 @@ def _plan_exercise(exercise: Exercise, tier: VolumeTier) -> PlanExercise:
         hold_seconds=volume.hold_seconds if is_hold else None,
         rest_seconds=volume.rest_seconds,
     )
+
+
+def _is_hold_exercise(exercise: Exercise) -> bool:
+    name = exercise.name.lower()
+
+    return "plank" in name or "hang" in name
