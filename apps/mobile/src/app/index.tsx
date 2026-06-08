@@ -76,16 +76,12 @@ const movementIcons: Record<string, FeatherName> = {
   squat: 'chevrons-down',
 };
 
-const exploreCards: {title: string; description: string; icon: FeatherName}[] = [
+const exploreCards: {title: string; description: string; icon: FeatherName; route: string}[] = [
   {
     title: 'Exercises',
-    description: 'Browse movement progressions, form notes, and training cues.',
+    description: 'Browse movement progressions, training cues, and form notes.',
     icon: 'activity',
-  },
-  {
-    title: 'Calisthenics wiki',
-    description: 'Read guides on skills, recovery, equipment, and programming basics.',
-    icon: 'book-open',
+    route: '/exercises',
   },
 ];
 
@@ -333,11 +329,7 @@ function DashboardScreen({profileId}: DashboardScreenProps) {
             </View>
 
             {todaysWorkout ? (
-              <Pressable
-                accessibilityLabel="Open today's plan"
-                accessibilityRole="button"
-                className="mt-4 gap-3"
-                onPress={() => router.push('/plan' as never)}>
+              <View className="mt-4 gap-3">
                 {todaysWorkout.exercises.map((exercise) => {
                   const isComplete = completedExerciseIds.has(exercise.exerciseId);
 
@@ -387,7 +379,23 @@ function DashboardScreen({profileId}: DashboardScreenProps) {
                     </View>
                   );
                 })}
-              </Pressable>
+                {!isTodayComplete ? (
+                  <Pressable
+                    accessibilityLabel="Start today's plan"
+                    accessibilityRole="button"
+                    className="mt-3 flex-row items-center justify-center gap-1.5 py-2"
+                    onPress={() => router.push('/plan' as never)}>
+                    <Text className="text-center font-mono text-xs uppercase tracking-widest text-foreground-light dark:text-foreground-dark">
+                      {"Start today's plan"}
+                    </Text>
+                    <NativeWindFeather
+                      className="text-foreground-light dark:text-foreground-dark"
+                      name="arrow-right"
+                      size={14}
+                    />
+                  </Pressable>
+                ) : null}
+              </View>
             ) : (
               <View className="mt-4">
                 <Image
@@ -502,7 +510,8 @@ function DashboardScreen({profileId}: DashboardScreenProps) {
                 <Pressable
                   accessibilityRole="button"
                   className="min-h-24 flex-row items-center gap-4 rounded-lg border border-border-light p-4 dark:border-border-dark"
-                  key={card.title}>
+                  key={card.title}
+                  onPress={() => router.push(card.route as never)}>
                   <View className="h-11 w-11 items-center justify-center rounded-full bg-surface-light dark:bg-surface-dark">
                     <NativeWindFeather
                       className="text-foreground-light dark:text-foreground-dark"
