@@ -55,7 +55,6 @@ QUESTIONNAIRE = {
             "question": "What can you currently do for pulling?",
             "hint": "Pulling ability decides whether the plan starts with rows, hangs, negatives, or full pull-up progressions.",
             "options": [
-                {"id": "no_bar", "label": "No bar access", "score": 0},
                 {"id": "cannot_hang", "label": "Cannot hang yet", "score": 0},
                 {"id": "hang_under_10", "label": "Hang under 10 sec", "score": 1},
                 {"id": "hang_10_30", "label": "Hang 10-30 sec", "score": 2},

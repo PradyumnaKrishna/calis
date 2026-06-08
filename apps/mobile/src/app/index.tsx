@@ -1,13 +1,15 @@
 import {useEffect, useMemo, useState, type ComponentProps} from 'react';
 
-import {ActivityIndicator, Image, Pressable, ScrollView, Text, View} from 'react-native';
+import {ActivityIndicator, Pressable, ScrollView, Text, View} from 'react-native';
 
 import {FontAwesome5} from '@expo/vector-icons';
 import {useQuery} from '@tanstack/react-query';
 import {useRouter} from 'expo-router';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {LevelCard} from '../components/level-card';
 import {NativeWindFeather} from '../components/nativewind-feather';
+import {TodayPlanCard} from '../components/plan/today-plan-card';
 import {ResetProfileButton} from '../components/reset-profile-button';
 import {useApi} from '../lib/api';
 import type {components} from '../lib/api-schema';
@@ -51,8 +53,6 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
-
-const restDayImage = require('../../assets/images/rest-day.png');
 
 type PlanExercise = components['schemas']['PlanExercise'];
 type FeatherName = ComponentProps<typeof NativeWindFeather>['name'];
@@ -147,31 +147,10 @@ function DashboardScreen() {
 
   const isSelectedToday = selectedDay === todayAsPlanDay();
 
-  const {
-    data: todayPlan,
-    isError: isTodayPlanError,
-    isLoading: isTodayPlanLoading,
-    refetch: refetchTodayPlan,
-  } = useQuery({
-    queryKey: ['today-plan'],
-    queryFn: async () => {
-      const {data, error} = await api.GET('/api/v1/plans/today');
-
-      if (error) {
-        throw error;
-      }
-
-      return data;
-    },
-  });
-
-  const todaysWorkout = todayPlan?.workout;
-  const completedExerciseIds = new Set(todayPlan?.completedExerciseIds ?? []);
-  const isTodayComplete = Boolean(todayPlan?.completed);
   const streakCount = profile?.streak ?? 0;
   const streakColor = streakCount > 0 ? '#2A7E3B' : '#D13415';
 
-  if (isFullPlanLoading || isTodayPlanLoading || isProfileLoading) {
+  if (isFullPlanLoading || isProfileLoading) {
     return (
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
         <View className="flex-1 justify-center p-6">
@@ -184,7 +163,7 @@ function DashboardScreen() {
     );
   }
 
-  if (isFullPlanError || isTodayPlanError || isProfileError || !fullPlan) {
+  if (isFullPlanError || isProfileError || !fullPlan) {
     return (
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
         <View className="flex-1 justify-center gap-4 p-6">
@@ -197,7 +176,6 @@ function DashboardScreen() {
               className="h-12 items-center justify-center rounded-full bg-foreground-light px-6 dark:bg-foreground-dark"
               onPress={() => {
                 refetchFullPlan();
-                refetchTodayPlan();
                 refetchProfile();
               }}>
               <Text className="text-base font-semibold text-background-light dark:text-background-dark">
@@ -269,137 +247,7 @@ function DashboardScreen() {
             </View>
           </View>
 
-          <View className="mt-8">
-            <View className="flex-row items-start justify-between gap-4">
-              <View className="flex-1">
-                <Text className="text-2xl font-black leading-8 text-foreground-light dark:text-foreground-dark">
-                  {isTodayComplete
-                    ? "Today's done"
-                    : todaysWorkout
-                      ? todaysWorkout.title
-                      : 'Rest day'}
-                </Text>
-                {isTodayComplete ? (
-                  <Text className="mt-1 text-base font-semibold text-muted-light dark:text-muted-dark">
-                    See you tomorrow.
-                  </Text>
-                ) : null}
-              </View>
-              <View
-                className={[
-                  'h-10 w-10 items-center justify-center rounded-full',
-                  isTodayComplete
-                    ? 'bg-success-surface-light dark:bg-success-surface-dark'
-                    : todaysWorkout
-                      ? 'bg-warning-surface-light dark:bg-warning-surface-dark'
-                      : 'bg-surface-light dark:bg-surface-dark',
-                ].join(' ')}>
-                {isTodayComplete ? (
-                  <NativeWindFeather
-                    className="text-success-light dark:text-success-dark"
-                    name="check"
-                    size={20}
-                  />
-                ) : todaysWorkout ? (
-                  <FontAwesome5 color="#AB6400" name="bolt" size={18} solid />
-                ) : (
-                  <NativeWindFeather
-                    className="text-muted-light dark:text-muted-dark"
-                    name="coffee"
-                    size={20}
-                  />
-                )}
-              </View>
-            </View>
-
-            {todaysWorkout ? (
-              <View className="mt-4 gap-3">
-                {todaysWorkout.exercises.map((exercise) => {
-                  const isComplete = completedExerciseIds.has(exercise.exerciseId);
-
-                  return (
-                    <View className="flex-row items-center gap-3" key={exercise.exerciseId}>
-                      <View
-                        className={[
-                          'h-9 w-9 items-center justify-center rounded-full',
-                          isComplete
-                            ? 'bg-success-surface-light dark:bg-success-surface-dark'
-                            : 'bg-surface-light dark:bg-surface-dark',
-                        ].join(' ')}>
-                        <NativeWindFeather
-                          className={
-                            isComplete
-                              ? 'text-success-light dark:text-success-dark'
-                              : 'text-muted-light dark:text-muted-dark'
-                          }
-                          name={
-                            isComplete
-                              ? 'check'
-                              : (movementIcons[exercise.movementPattern] ?? 'activity')
-                          }
-                          size={18}
-                        />
-                      </View>
-                      <View className="flex-1">
-                        <Text
-                          className={[
-                            'text-base font-bold',
-                            isComplete
-                              ? 'text-muted-light line-through dark:text-muted-dark'
-                              : 'text-foreground-light dark:text-foreground-dark',
-                          ].join(' ')}>
-                          {exercise.name}
-                        </Text>
-                        <Text
-                          className={[
-                            'mt-0.5 text-sm font-semibold',
-                            isComplete
-                              ? 'text-muted-light line-through dark:text-muted-dark'
-                              : 'text-muted-light dark:text-muted-dark',
-                          ].join(' ')}>
-                          {exercisePrescription(exercise)}
-                        </Text>
-                      </View>
-                    </View>
-                  );
-                })}
-                {!isTodayComplete ? (
-                  <Pressable
-                    accessibilityLabel="Start today's plan"
-                    accessibilityRole="button"
-                    className="mt-3 flex-row items-center justify-center gap-1.5 py-2"
-                    onPress={() => router.push('/plan' as never)}>
-                    <Text className="text-center font-mono text-xs uppercase tracking-widest text-foreground-light dark:text-foreground-dark">
-                      {"Start today's plan"}
-                    </Text>
-                    <NativeWindFeather
-                      className="text-foreground-light dark:text-foreground-dark"
-                      name="arrow-right"
-                      size={14}
-                    />
-                  </Pressable>
-                ) : null}
-              </View>
-            ) : (
-              <View className="mt-4">
-                <Image
-                  accessibilityIgnoresInvertColors
-                  accessibilityLabel="Cartoon person resting on a couch"
-                  resizeMode="cover"
-                  source={restDayImage}
-                  style={{
-                    backgroundColor: '#F1F0EF',
-                    borderRadius: 8,
-                    height: 188,
-                    width: '100%',
-                  }}
-                />
-                <Text className="mt-4 text-base font-medium leading-6 text-muted-light dark:text-muted-dark">
-                  No workout scheduled today. Recover well so the next session feels stronger.
-                </Text>
-              </View>
-            )}
-          </View>
+          <TodayPlanCard />
 
           <View className="mt-8 border-t border-border-light pt-6 dark:border-border-dark">
             <View className="flex-row justify-between">
@@ -488,6 +336,8 @@ function DashboardScreen() {
             <Text className="text-3xl font-black leading-9 text-foreground-light dark:text-foreground-dark">
               Keep building
             </Text>
+
+            <LevelCard />
 
             <View className="gap-3">
               {exploreCards.map((card) => (

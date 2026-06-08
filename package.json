@@ -8,7 +8,7 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx}\"",
     "generate:api-schema": "apps/api/.venv/bin/python scripts/export-openapi.py",
-    "generate:api-types": "mkdir -p .cache && bun run generate:api-schema > .cache/calis-openapi.json && openapi-typescript .cache/calis-openapi.json -o apps/mobile/src/lib/api-schema.ts"
+    "generate:api-types": "mkdir -p .cache && bun run generate:api-schema > .cache/calis-openapi.json && openapi-typescript .cache/calis-openapi.json -o apps/mobile/src/lib/api-schema.ts && prettier --write apps/mobile/src/lib/api-schema.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

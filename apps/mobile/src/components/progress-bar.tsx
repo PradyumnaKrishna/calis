@@ -21,10 +21,11 @@ export function ProgressBar({value}: ProgressBarProps) {
   }, [progressAnim, value]);
 
   return (
-    <View className="h-10 flex-1 justify-center">
+    <View className="flex-1 justify-center" style={{height: 40}}>
       <View
-        className="h-2 overflow-hidden rounded-full bg-surface-light dark:bg-surface-dark"
-        onLayout={(event) => setTrackWidth(event.nativeEvent.layout.width)}>
+        className="overflow-hidden rounded-full bg-surface-light dark:bg-surface-dark"
+        onLayout={(event) => setTrackWidth(event.nativeEvent.layout.width)}
+        style={{height: 8}}>
         <Animated.View style={{height: '100%', overflow: 'hidden', width: animatedProgressWidth}}>
           <View className="h-full w-full rounded-full bg-primary-light dark:bg-primary-dark" />
         </Animated.View>
