@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 
 from ..models import Level
 from ..models import QuestionOptionRecord
-from ..schemas import AnswerValue, LevelAssessment
+from ..schemas import AnswerValue
 
 
 def _level_from_score(score: float) -> Level:
@@ -32,11 +32,11 @@ def _selected_pairs(answers: dict[str, AnswerValue]) -> set[tuple[str, str]]:
     }
 
 
-def assess_level(session: Session, answers: dict[str, AnswerValue]) -> LevelAssessment:
+def assess_level(session: Session, answers: dict[str, AnswerValue]) -> Level:
     selected_pairs = _selected_pairs(answers)
 
     if not selected_pairs:
-        return LevelAssessment(level=Level.FOUNDATION)
+        return Level.FOUNDATION
 
     options = session.exec(
         select(QuestionOptionRecord)
@@ -53,4 +53,4 @@ def assess_level(session: Session, answers: dict[str, AnswerValue]) -> LevelAsse
         for option in options
     )
 
-    return LevelAssessment(level=_level_from_score(score))
+    return _level_from_score(score)

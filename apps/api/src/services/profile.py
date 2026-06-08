@@ -48,7 +48,7 @@ def _training_days(answer: str) -> int:
 
 
 def create_profile(session: Session, answers: dict[str, AnswerValue]) -> Profile:
-    assessment = assess_level(session, answers)
+    level = assess_level(session, answers)
     goal = _single_answer(answers, "primary_goal", "general_fitness")
     training_days = _training_days(_single_answer(answers, "training_days", "days_3"))
     equipment = _multi_answer(answers, "equipment")
@@ -60,12 +60,12 @@ def create_profile(session: Session, answers: dict[str, AnswerValue]) -> Profile
     profile = Profile(
         id=f"profile_{uuid4().hex}",
         goal=goal,
-        level=assessment.level,
+        level=level,
         training_days=training_days,
         equipment=equipment,
         constraints=constraints,
         answers=answers,
-        current_plan_level=assessment.level,
+        current_plan_level=level,
         current_volume_tier=VolumeTier.LOW,
         current_plan_started_at=now,
         streak=0,

@@ -1,5 +1,5 @@
 from .exercise import ExerciseList, ExercisePublic
-from .level import AnswerValue, LevelAssessment, LevelRequest
+from .level import AnswerValue
 from .plan import (
     CompleteTodayExerciseRequest,
     CurrentPlan,
@@ -14,8 +14,6 @@ __all__ = [
     "ExerciseList",
     "ExercisePublic",
     "AnswerValue",
-    "LevelAssessment",
-    "LevelRequest",
     "CompleteTodayExerciseRequest",
     "CurrentPlan",
     "PlanExercise",

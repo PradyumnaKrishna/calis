@@ -13,7 +13,7 @@ import {useApi} from '../lib/api';
 import type {components} from '../lib/api-schema';
 import {storeProfileId} from '../lib/profile-storage';
 
-type Answers = components['schemas']['LevelRequest']['answers'];
+type Answers = components['schemas']['ProfileCreateRequest']['answers'];
 
 export default function OnboardingScreen() {
   const api = useApi();
