@@ -16,3 +16,8 @@ class ProfileCreated(SQLModel):
     level: Level
     current_plan_level: Level = Field(alias="currentPlanLevel")
     current_volume_tier: VolumeTier = Field(alias="currentVolumeTier")
+    streak: int
+
+
+class ProfilePublic(ProfileCreated):
+    pass

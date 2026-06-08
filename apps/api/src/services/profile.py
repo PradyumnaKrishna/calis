@@ -67,6 +67,8 @@ def create_profile(session: Session, answers: dict[str, AnswerValue]) -> Profile
         answers=answers,
         current_plan_level=assessment.level,
         current_volume_tier=VolumeTier.LOW,
+        current_plan_started_at=now,
+        streak=0,
         created_at=now,
         updated_at=now,
     )
@@ -87,4 +89,6 @@ def advance_profile_plan(profile: Profile) -> None:
             profile.current_plan_level = next_level(profile.current_plan_level)
             profile.current_volume_tier = VolumeTier.LOW
 
-    profile.updated_at = datetime.now(UTC)
+    now = datetime.now(UTC)
+    profile.current_plan_started_at = now
+    profile.updated_at = now

@@ -7,7 +7,7 @@ from .plan import (
     PlanWorkout,
     TodayPlan,
 )
-from .profile import ProfileCreated, ProfileCreateRequest
+from .profile import ProfileCreated, ProfileCreateRequest, ProfilePublic
 from .questionnaire import Questionnaire, QuestionnaireOption, QuestionnaireStep
 
 __all__ = [
@@ -23,6 +23,7 @@ __all__ = [
     "TodayPlan",
     "ProfileCreated",
     "ProfileCreateRequest",
+    "ProfilePublic",
     "Questionnaire",
     "QuestionnaireOption",
     "QuestionnaireStep",

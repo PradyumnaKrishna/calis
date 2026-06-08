@@ -134,6 +134,28 @@ function DashboardScreen({profileId}: DashboardScreenProps) {
     },
   });
 
+  const {
+    data: profile,
+    isError: isProfileError,
+    isLoading: isProfileLoading,
+    refetch: refetchProfile,
+  } = useQuery({
+    queryKey: ['profile', profileId],
+    queryFn: async () => {
+      const {data, error} = await api.GET('/api/v1/profile', {
+        params: {
+          header: {'X-Profile-Id': profileId},
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+  });
+
   const selectedWorkout = useMemo(
     () => fullPlan?.workouts.find((workout) => workout.day === selectedDay),
     [fullPlan, selectedDay],
@@ -166,10 +188,10 @@ function DashboardScreen({profileId}: DashboardScreenProps) {
   const todaysWorkout = todayPlan?.workout;
   const completedExerciseIds = new Set(todayPlan?.completedExerciseIds ?? []);
   const isTodayComplete = Boolean(todayPlan?.completed);
-  const streakCount = 0;
+  const streakCount = profile?.streak ?? 0;
   const streakColor = streakCount > 0 ? '#2A7E3B' : '#D13415';
 
-  if (isFullPlanLoading || isTodayPlanLoading) {
+  if (isFullPlanLoading || isTodayPlanLoading || isProfileLoading) {
     return (
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
         <View className="flex-1 justify-center p-6">
@@ -182,7 +204,7 @@ function DashboardScreen({profileId}: DashboardScreenProps) {
     );
   }
 
-  if (isFullPlanError || isTodayPlanError || !fullPlan) {
+  if (isFullPlanError || isTodayPlanError || isProfileError || !fullPlan) {
     return (
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
         <View className="flex-1 justify-center gap-4 p-6">
@@ -196,6 +218,7 @@ function DashboardScreen({profileId}: DashboardScreenProps) {
               onPress={() => {
                 refetchFullPlan();
                 refetchTodayPlan();
+                refetchProfile();
               }}>
               <Text className="text-base font-semibold text-background-light dark:text-background-dark">
                 Retry

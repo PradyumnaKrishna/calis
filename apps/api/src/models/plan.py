@@ -24,6 +24,9 @@ class PlanWorkoutCompletion(SQLModel, table=True):
     profile_id: str = Field(primary_key=True, foreign_key="profiles.id")
     workout_date: date = Field(primary_key=True, index=True)
     day: int = Field(index=True)
+    plan_level: Level | None = Field(default=None, index=True)
+    volume_tier: VolumeTier | None = Field(default=None, index=True)
+    feedback: str | None = Field(default=None, index=True)
     completed_exercise_ids: list[str] = Field(
         default_factory=list,
         sa_column=Column(JSON),

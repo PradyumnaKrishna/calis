@@ -8,8 +8,14 @@ from ..models import PlanWorkoutCompletion, Profile
 from ..schemas import CompleteTodayExerciseRequest, CurrentPlan, TodayPlan
 from ..services.plan import get_current_plan
 from ..services.profile import advance_profile_plan
+from ..services.streak import (
+    current_plan_completed_workout_count,
+    increment_streak,
+    reconcile_streak_for_current_plan,
+)
 
 router = APIRouter(prefix="/plans", tags=["plans"])
+PLAN_ADVANCEMENT_STREAK_THRESHOLD = 4
 
 
 def get_profile(
@@ -79,6 +85,8 @@ def complete_today_plan(
     if workout is None:
         return None
 
+    reconcile_streak_for_current_plan(session, profile, plan)
+
     completion = session.get(PlanWorkoutCompletion, (profile.id, today))
     completed_exercise_ids = (
         completion.completed_exercise_ids
@@ -113,6 +121,8 @@ def complete_today_plan(
             day=day,
         )
 
+    completion.plan_level = profile.current_plan_level
+    completion.volume_tier = profile.current_volume_tier
     completion.completed_exercise_ids = next_completed_exercise_ids
     completion.completed = is_completed
     completion.updated_at = datetime.now(UTC)
@@ -120,7 +130,15 @@ def complete_today_plan(
     session.add(completion)
 
     if is_completed and not was_completed:
-        advance_profile_plan(profile)
+        increment_streak(profile)
+        session.flush()
+
+        if (
+            current_plan_completed_workout_count(session, profile)
+            > PLAN_ADVANCEMENT_STREAK_THRESHOLD
+        ):
+            advance_profile_plan(profile)
+
         session.add(profile)
 
     session.commit()

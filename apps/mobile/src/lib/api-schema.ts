@@ -4,594 +4,654 @@
  */
 
 export interface paths {
-    "/api/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Health */
-        get: operations["health_api_health_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/api/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/exercises": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Exercises */
-        get: operations["list_exercises_api_v1_exercises_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Health */
+    get: operations['health_api_health_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/exercises': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/exercises/{slug}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Exercise */
-        get: operations["get_exercise_api_v1_exercises__slug__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** List Exercises */
+    get: operations['list_exercises_api_v1_exercises_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/exercises/{slug}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/onboarding/questionnaire": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Questionnaire */
-        get: operations["questionnaire_api_v1_onboarding_questionnaire_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get Exercise */
+    get: operations['get_exercise_api_v1_exercises__slug__get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/onboarding/questionnaire': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/onboarding/level": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Level */
-        post: operations["level_api_v1_onboarding_level_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Questionnaire */
+    get: operations['questionnaire_api_v1_onboarding_questionnaire_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/onboarding/level': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/onboarding/profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Profile */
-        post: operations["profile_api_v1_onboarding_profile_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Level */
+    post: operations['level_api_v1_onboarding_level_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/onboarding/profile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/plans": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Plan */
-        get: operations["plan_api_v1_plans_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Profile */
+    post: operations['profile_api_v1_onboarding_profile_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/plans': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/plans/today": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Today Plan */
-        get: operations["today_plan_api_v1_plans_today_get"];
-        put?: never;
-        /** Complete Today Plan */
-        post: operations["complete_today_plan_api_v1_plans_today_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Plan */
+    get: operations['plan_api_v1_plans_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/plans/today': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    /** Today Plan */
+    get: operations['today_plan_api_v1_plans_today_get'];
+    put?: never;
+    /** Complete Today Plan */
+    post: operations['complete_today_plan_api_v1_plans_today_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/profile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Profile */
+    get: operations['profile_api_v1_profile_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /** CompleteTodayExerciseRequest */
-        CompleteTodayExerciseRequest: {
-            /** Exerciseid */
-            exerciseId: string;
-        };
-        /** CurrentPlan */
-        CurrentPlan: {
-            /** Profileid */
-            profileId: string;
-            level: components["schemas"]["Level"];
-            planLevel: components["schemas"]["Level"];
-            volumeTier: components["schemas"]["VolumeTier"];
-            /** Cycledays */
-            cycleDays: number;
-            /** Workouts */
-            workouts: components["schemas"]["PlanWorkout"][];
-        };
-        /** ExerciseList */
-        ExerciseList: {
-            /** Data */
-            data: components["schemas"]["ExercisePublic"][];
-        };
-        /** ExercisePublic */
-        ExercisePublic: {
-            /** Id */
-            id: string;
-            /** Slug */
-            slug: string;
-            /** Name */
-            name: string;
-            /** Bodyregion */
-            bodyRegion: string;
-            /** Movementpattern */
-            movementPattern: string;
-            /** Difficulty */
-            difficulty: number;
-            /** Level */
-            level: string;
-            /** Gif */
-            gif: string;
-            /** Instructions */
-            instructions: string;
-        };
-        /** HTTPValidationError */
-        HTTPValidationError: {
-            /** Detail */
-            detail?: components["schemas"]["ValidationError"][];
-        };
-        /**
-         * Level
-         * @enum {string}
-         */
-        Level: "foundation" | "beginner" | "intermediate" | "advanced";
-        /** LevelAssessment */
-        LevelAssessment: {
-            level: components["schemas"]["Level"];
-        };
-        /** LevelRequest */
-        LevelRequest: {
-            /** Answers */
-            answers: {
-                [key: string]: string | string[];
-            };
-        };
-        /** PlanExercise */
-        PlanExercise: {
-            /** Exerciseid */
-            exerciseId: string;
-            /** Slug */
-            slug: string;
-            /** Name */
-            name: string;
-            /** Movementpattern */
-            movementPattern: string;
-            /** Gif */
-            gif: string;
-            /** Instructions */
-            instructions: string;
-            /** Sets */
-            sets: number;
-            /** Reps */
-            reps?: string | null;
-            /** Holdseconds */
-            holdSeconds?: string | null;
-            /** Restseconds */
-            restSeconds: number;
-        };
-        /** PlanWorkout */
-        PlanWorkout: {
-            /** Day */
-            day: number;
-            /** Title */
-            title: string;
-            /** Exercises */
-            exercises: components["schemas"]["PlanExercise"][];
-        };
-        /** ProfileCreateRequest */
-        ProfileCreateRequest: {
-            /** Answers */
-            answers: {
-                [key: string]: string | string[];
-            };
-        };
-        /** ProfileCreated */
-        ProfileCreated: {
-            /** Profileid */
-            profileId: string;
-            level: components["schemas"]["Level"];
-            currentPlanLevel: components["schemas"]["Level"];
-            currentVolumeTier: components["schemas"]["VolumeTier"];
-        };
-        /** Questionnaire */
-        Questionnaire: {
-            /** Id */
-            id: string;
-            /** Title */
-            title: string;
-            /** Description */
-            description: string;
-            /** Steps */
-            steps: components["schemas"]["QuestionnaireStep"][];
-        };
-        /** QuestionnaireOption */
-        QuestionnaireOption: {
-            /** Id */
-            id: string;
-            /** Label */
-            label: string;
-            /** Score */
-            score?: number | null;
-        };
-        /** QuestionnaireStep */
-        QuestionnaireStep: {
-            /** Id */
-            id: string;
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "single" | "multi";
-            /** Weight */
-            weight: number;
-            /** Eyebrow */
-            eyebrow: string;
-            /** Question */
-            question: string;
-            /** Hint */
-            hint: string;
-            /** Minselections */
-            minSelections?: number | null;
-            /** Maxselections */
-            maxSelections?: number | null;
-            /** Options */
-            options: components["schemas"]["QuestionnaireOption"][];
-        };
-        /** TodayPlan */
-        TodayPlan: {
-            /** Profileid */
-            profileId: string;
-            level: components["schemas"]["Level"];
-            planLevel: components["schemas"]["Level"];
-            volumeTier: components["schemas"]["VolumeTier"];
-            /** Day */
-            day: number;
-            /** Completed */
-            completed: boolean;
-            /** Completedexerciseids */
-            completedExerciseIds: string[];
-            workout: components["schemas"]["PlanWorkout"];
-        };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
-        };
-        /**
-         * VolumeTier
-         * @enum {string}
-         */
-        VolumeTier: "low" | "medium" | "high";
+  schemas: {
+    /** CompleteTodayExerciseRequest */
+    CompleteTodayExerciseRequest: {
+      /** Exerciseid */
+      exerciseId: string;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    /** CurrentPlan */
+    CurrentPlan: {
+      /** Profileid */
+      profileId: string;
+      level: components['schemas']['Level'];
+      planLevel: components['schemas']['Level'];
+      volumeTier: components['schemas']['VolumeTier'];
+      /** Cycledays */
+      cycleDays: number;
+      /** Workouts */
+      workouts: components['schemas']['PlanWorkout'][];
+    };
+    /** ExerciseList */
+    ExerciseList: {
+      /** Data */
+      data: components['schemas']['ExercisePublic'][];
+    };
+    /** ExercisePublic */
+    ExercisePublic: {
+      /** Id */
+      id: string;
+      /** Slug */
+      slug: string;
+      /** Name */
+      name: string;
+      /** Bodyregion */
+      bodyRegion: string;
+      /** Movementpattern */
+      movementPattern: string;
+      /** Difficulty */
+      difficulty: number;
+      /** Level */
+      level: string;
+      /** Gif */
+      gif: string;
+      /** Instructions */
+      instructions: string;
+    };
+    /** HTTPValidationError */
+    HTTPValidationError: {
+      /** Detail */
+      detail?: components['schemas']['ValidationError'][];
+    };
+    /**
+     * Level
+     * @enum {string}
+     */
+    Level: 'foundation' | 'beginner' | 'intermediate' | 'advanced';
+    /** LevelAssessment */
+    LevelAssessment: {
+      level: components['schemas']['Level'];
+    };
+    /** LevelRequest */
+    LevelRequest: {
+      /** Answers */
+      answers: {
+        [key: string]: string | string[];
+      };
+    };
+    /** PlanExercise */
+    PlanExercise: {
+      /** Exerciseid */
+      exerciseId: string;
+      /** Slug */
+      slug: string;
+      /** Name */
+      name: string;
+      /** Movementpattern */
+      movementPattern: string;
+      /** Gif */
+      gif: string;
+      /** Instructions */
+      instructions: string;
+      /** Sets */
+      sets: number;
+      /** Reps */
+      reps?: string | null;
+      /** Holdseconds */
+      holdSeconds?: string | null;
+      /** Restseconds */
+      restSeconds: number;
+    };
+    /** PlanWorkout */
+    PlanWorkout: {
+      /** Day */
+      day: number;
+      /** Title */
+      title: string;
+      /** Exercises */
+      exercises: components['schemas']['PlanExercise'][];
+    };
+    /** ProfileCreateRequest */
+    ProfileCreateRequest: {
+      /** Answers */
+      answers: {
+        [key: string]: string | string[];
+      };
+    };
+    /** ProfileCreated */
+    ProfileCreated: {
+      /** Profileid */
+      profileId: string;
+      level: components['schemas']['Level'];
+      currentPlanLevel: components['schemas']['Level'];
+      currentVolumeTier: components['schemas']['VolumeTier'];
+      /** Streak */
+      streak: number;
+    };
+    /** ProfilePublic */
+    ProfilePublic: {
+      /** Profileid */
+      profileId: string;
+      level: components['schemas']['Level'];
+      currentPlanLevel: components['schemas']['Level'];
+      currentVolumeTier: components['schemas']['VolumeTier'];
+      /** Streak */
+      streak: number;
+    };
+    /** Questionnaire */
+    Questionnaire: {
+      /** Id */
+      id: string;
+      /** Title */
+      title: string;
+      /** Description */
+      description: string;
+      /** Steps */
+      steps: components['schemas']['QuestionnaireStep'][];
+    };
+    /** QuestionnaireOption */
+    QuestionnaireOption: {
+      /** Id */
+      id: string;
+      /** Label */
+      label: string;
+      /** Score */
+      score?: number | null;
+    };
+    /** QuestionnaireStep */
+    QuestionnaireStep: {
+      /** Id */
+      id: string;
+      /**
+       * Type
+       * @enum {string}
+       */
+      type: 'single' | 'multi';
+      /** Weight */
+      weight: number;
+      /** Eyebrow */
+      eyebrow: string;
+      /** Question */
+      question: string;
+      /** Hint */
+      hint: string;
+      /** Minselections */
+      minSelections?: number | null;
+      /** Maxselections */
+      maxSelections?: number | null;
+      /** Options */
+      options: components['schemas']['QuestionnaireOption'][];
+    };
+    /** TodayPlan */
+    TodayPlan: {
+      /** Profileid */
+      profileId: string;
+      level: components['schemas']['Level'];
+      planLevel: components['schemas']['Level'];
+      volumeTier: components['schemas']['VolumeTier'];
+      /** Day */
+      day: number;
+      /** Completed */
+      completed: boolean;
+      /** Completedexerciseids */
+      completedExerciseIds: string[];
+      workout: components['schemas']['PlanWorkout'];
+    };
+    /** ValidationError */
+    ValidationError: {
+      /** Location */
+      loc: (string | number)[];
+      /** Message */
+      msg: string;
+      /** Error Type */
+      type: string;
+    };
+    /**
+     * VolumeTier
+     * @enum {string}
+     */
+    VolumeTier: 'low' | 'medium' | 'high';
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    health_api_health_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: boolean;
-                    };
-                };
-            };
-        };
+  health_api_health_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    list_exercises_api_v1_exercises_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExerciseList"];
-                };
-            };
+        content: {
+          'application/json': {
+            [key: string]: boolean;
+          };
         };
+      };
     };
-    get_exercise_api_v1_exercises__slug__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExercisePublic"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  list_exercises_api_v1_exercises_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    questionnaire_api_v1_onboarding_questionnaire_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Questionnaire"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['ExerciseList'];
         };
+      };
     };
-    level_api_v1_onboarding_level_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LevelRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LevelAssessment"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  get_exercise_api_v1_exercises__slug__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
     };
-    profile_api_v1_onboarding_profile_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfileCreateRequest"];
-            };
+        content: {
+          'application/json': components['schemas']['ExercisePublic'];
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfileCreated"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
-    plan_api_v1_plans_get: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-Profile-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CurrentPlan"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  questionnaire_api_v1_onboarding_questionnaire_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    today_plan_api_v1_plans_today_get: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-Profile-Id": string;
-            };
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TodayPlan"] | null;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Questionnaire'];
         };
+      };
     };
-    complete_today_plan_api_v1_plans_today_post: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-Profile-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CompleteTodayExerciseRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TodayPlan"] | null;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  level_api_v1_onboarding_level_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LevelRequest'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LevelAssessment'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  profile_api_v1_onboarding_profile_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProfileCreateRequest'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileCreated'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  plan_api_v1_plans_get: {
+    parameters: {
+      query?: never;
+      header: {
+        'X-Profile-Id': string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CurrentPlan'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  today_plan_api_v1_plans_today_get: {
+    parameters: {
+      query?: never;
+      header: {
+        'X-Profile-Id': string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TodayPlan'] | null;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  complete_today_plan_api_v1_plans_today_post: {
+    parameters: {
+      query?: never;
+      header: {
+        'X-Profile-Id': string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CompleteTodayExerciseRequest'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TodayPlan'] | null;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  profile_api_v1_profile_get: {
+    parameters: {
+      query?: never;
+      header: {
+        'X-Profile-Id': string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfilePublic'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
 }

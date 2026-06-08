@@ -59,4 +59,5 @@ def profile(
         level=created.level,
         current_plan_level=created.current_plan_level,
         current_volume_tier=created.current_volume_tier,
+        streak=created.streak,
     )

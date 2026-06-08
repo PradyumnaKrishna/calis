@@ -114,6 +114,8 @@ function PlanContent({profileId}: PlanContentProps) {
     },
     onSuccess: (nextPlan) => {
       queryClient.setQueryData(['today-plan', profileId], nextPlan);
+      queryClient.invalidateQueries({queryKey: ['plan', profileId]});
+      queryClient.invalidateQueries({queryKey: ['profile', profileId]});
     },
   });
 

@@ -28,5 +28,7 @@ class Profile(SQLModel, table=True):
     )
     current_plan_level: Level = Field(index=True)
     current_volume_tier: VolumeTier = Field(default=VolumeTier.LOW, index=True)
+    current_plan_started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    streak: int = Field(default=0, index=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
