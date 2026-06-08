@@ -106,15 +106,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/plans/current": {
+    "/api/v1/plans": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Current Plan */
-        get: operations["current_plan_api_v1_plans_current_get"];
+        /** Plan */
+        get: operations["plan_api_v1_plans_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -123,17 +123,18 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/plans/current/progress": {
+    "/api/v1/plans/today": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Today Plan */
+        get: operations["today_plan_api_v1_plans_today_get"];
         put?: never;
-        /** Progress Current Plan */
-        post: operations["progress_current_plan_api_v1_plans_current_progress_post"];
+        /** Complete Today Plan */
+        post: operations["complete_today_plan_api_v1_plans_today_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -144,6 +145,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** CompleteTodayExerciseRequest */
+        CompleteTodayExerciseRequest: {
+            /** Exerciseid */
+            exerciseId: string;
+        };
         /** CurrentPlan */
         CurrentPlan: {
             /** Profileid */
@@ -213,6 +219,10 @@ export interface components {
             name: string;
             /** Movementpattern */
             movementPattern: string;
+            /** Gif */
+            gif: string;
+            /** Instructions */
+            instructions: string;
             /** Sets */
             sets: number;
             /** Reps */
@@ -221,21 +231,6 @@ export interface components {
             holdSeconds?: string | null;
             /** Restseconds */
             restSeconds: number;
-        };
-        /** PlanProgressRequest */
-        PlanProgressRequest: {
-            /**
-             * Result
-             * @enum {string}
-             */
-            result: "completed" | "too_easy" | "too_hard" | "pain" | "skipped";
-        };
-        /** PlanProgressResponse */
-        PlanProgressResponse: {
-            /** Profileid */
-            profileId: string;
-            planLevel: components["schemas"]["Level"];
-            volumeTier: components["schemas"]["VolumeTier"];
         };
         /** PlanWorkout */
         PlanWorkout: {
@@ -304,6 +299,21 @@ export interface components {
             maxSelections?: number | null;
             /** Options */
             options: components["schemas"]["QuestionnaireOption"][];
+        };
+        /** TodayPlan */
+        TodayPlan: {
+            /** Profileid */
+            profileId: string;
+            level: components["schemas"]["Level"];
+            planLevel: components["schemas"]["Level"];
+            volumeTier: components["schemas"]["VolumeTier"];
+            /** Day */
+            day: number;
+            /** Completed */
+            completed: boolean;
+            /** Completedexerciseids */
+            completedExerciseIds: string[];
+            workout: components["schemas"]["PlanWorkout"];
         };
         /** ValidationError */
         ValidationError: {
@@ -487,7 +497,7 @@ export interface operations {
             };
         };
     };
-    current_plan_api_v1_plans_current_get: {
+    plan_api_v1_plans_get: {
         parameters: {
             query?: never;
             header: {
@@ -518,7 +528,38 @@ export interface operations {
             };
         };
     };
-    progress_current_plan_api_v1_plans_current_progress_post: {
+    today_plan_api_v1_plans_today_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Profile-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TodayPlan"] | null;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_today_plan_api_v1_plans_today_post: {
         parameters: {
             query?: never;
             header: {
@@ -529,7 +570,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PlanProgressRequest"];
+                "application/json": components["schemas"]["CompleteTodayExerciseRequest"];
             };
         };
         responses: {
@@ -539,7 +580,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PlanProgressResponse"];
+                    "application/json": components["schemas"]["TodayPlan"] | null;
                 };
             };
             /** @description Validation Error */

@@ -1,5 +1,3 @@
-from typing import Literal
-
 from pydantic import ConfigDict
 from sqlmodel import Field, SQLModel
 
@@ -13,6 +11,8 @@ class PlanExercise(SQLModel):
     slug: str
     name: str
     movement_pattern: str = Field(alias="movementPattern")
+    gif: str
+    instructions: str
     sets: int
     reps: str | None = None
     hold_seconds: str | None = Field(default=None, alias="holdSeconds")
@@ -36,13 +36,20 @@ class CurrentPlan(SQLModel):
     workouts: list[PlanWorkout]
 
 
-class PlanProgressRequest(SQLModel):
-    result: Literal["completed", "too_easy", "too_hard", "pain", "skipped"]
-
-
-class PlanProgressResponse(SQLModel):
+class TodayPlan(SQLModel):
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
     profile_id: str = Field(alias="profileId")
+    level: Level
     plan_level: Level = Field(alias="planLevel")
     volume_tier: VolumeTier = Field(alias="volumeTier")
+    day: int
+    completed: bool
+    completed_exercise_ids: list[str] = Field(alias="completedExerciseIds")
+    workout: PlanWorkout
+
+
+class CompleteTodayExerciseRequest(SQLModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    exercise_id: str = Field(alias="exerciseId")

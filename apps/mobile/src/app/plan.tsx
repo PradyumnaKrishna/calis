@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 
 import {
   ActivityIndicator,
@@ -9,29 +9,16 @@ import {
   View,
 } from 'react-native';
 
-import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {useRouter} from 'expo-router';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {NativeWindFeather} from '../components/nativewind-feather';
 import {CarouselDots} from '../components/plan/carousel-dots';
 import {ExerciseCard} from '../components/plan/exercise-card';
+import {ResetProfileButton} from '../components/reset-profile-button';
 import {useApi} from '../lib/api';
-import {clearStoredProfileId, getStoredProfileId} from '../lib/profile-storage';
-
-const emptyCompletedExerciseIds = new Set<string>();
-
-function todayAsPlanDay() {
-  const day = new Date().getDay();
-
-  return day === 0 ? 7 : day;
-}
-
-function nextWorkoutDay(day: number, workoutDays: number[]) {
-  const sortedDays = [...workoutDays].sort((left, right) => left - right);
-
-  return sortedDays.find((workoutDay) => workoutDay >= day) ?? sortedDays[0];
-}
+import {getStoredProfileId} from '../lib/profile-storage';
 
 export default function PlanRoute() {
   const router = useRouter();
@@ -84,10 +71,6 @@ function PlanContent({profileId}: PlanContentProps) {
   const {width: windowWidth} = useWindowDimensions();
   const cardScrollRef = useRef<ScrollView>(null);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
-  const [completionState, setCompletionState] = useState<{ids: Set<string>; scope: string}>({
-    ids: new Set(),
-    scope: '',
-  });
 
   const {
     data: plan,
@@ -95,9 +78,9 @@ function PlanContent({profileId}: PlanContentProps) {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ['current-plan', profileId],
+    queryKey: ['today-plan', profileId],
     queryFn: async () => {
-      const {data, error} = await api.GET('/api/v1/plans/current', {
+      const {data, error} = await api.GET('/api/v1/plans/today', {
         params: {
           header: {'X-Profile-Id': profileId},
         },
@@ -111,58 +94,28 @@ function PlanContent({profileId}: PlanContentProps) {
     },
   });
 
-  const todaysWorkout = useMemo(
-    () => plan?.workouts.find((workout) => workout.day === todayAsPlanDay()),
-    [plan],
-  );
-  const activeWorkout = useMemo(() => {
-    if (!plan) {
-      return undefined;
-    }
+  const activeWorkout = plan?.workout;
+  const isTodayComplete = Boolean(plan?.completed);
+  const completedExerciseIds = new Set(plan?.completedExerciseIds ?? []);
+  const completePlanMutation = useMutation({
+    mutationFn: async (exerciseId: string) => {
+      const {data, error} = await api.POST('/api/v1/plans/today', {
+        body: {exerciseId},
+        params: {
+          header: {'X-Profile-Id': profileId},
+        },
+      });
 
-    if (todaysWorkout) {
-      return todaysWorkout;
-    }
-
-    const workoutDay = nextWorkoutDay(
-      todayAsPlanDay(),
-      plan.workouts.map((workout) => workout.day),
-    );
-
-    return plan.workouts.find((workout) => workout.day === workoutDay);
-  }, [plan, todaysWorkout]);
-  const todaysExerciseIds = useMemo(
-    () => activeWorkout?.exercises.map((exercise) => exercise.exerciseId) ?? [],
-    [activeWorkout],
-  );
-  const completionScope = `${profileId}:${activeWorkout?.day ?? 'rest'}:${todaysExerciseIds.join(',')}`;
-  const completedExerciseIds =
-    completionState.scope === completionScope ? completionState.ids : emptyCompletedExerciseIds;
-  const completedTodayCount = todaysExerciseIds.filter((exerciseId) =>
-    completedExerciseIds.has(exerciseId),
-  ).length;
-  const isTodayComplete =
-    todaysExerciseIds.length > 0 && completedTodayCount === todaysExerciseIds.length;
-
-  async function resetProfile() {
-    await clearStoredProfileId();
-    queryClient.setQueryData(['stored-profile-id'], null);
-    router.replace('/' as never);
-  }
-
-  function toggleExerciseComplete(exerciseId: string) {
-    setCompletionState((current) => {
-      const next = new Set(current.scope === completionScope ? current.ids : []);
-
-      if (next.has(exerciseId)) {
-        next.delete(exerciseId);
-      } else {
-        next.add(exerciseId);
+      if (error) {
+        throw error;
       }
 
-      return {ids: next, scope: completionScope};
-    });
-  }
+      return data;
+    },
+    onSuccess: (nextPlan) => {
+      queryClient.setQueryData(['today-plan', profileId], nextPlan);
+    },
+  });
 
   function updateActiveCardIndex(offsetX: number) {
     if (windowWidth <= 0 || !activeWorkout) {
@@ -207,7 +160,7 @@ function PlanContent({profileId}: PlanContentProps) {
     );
   }
 
-  if (isError || !plan) {
+  if (isError) {
     return (
       <SafeAreaView
         className="flex-1 bg-background-light dark:bg-background-dark"
@@ -225,14 +178,7 @@ function PlanContent({profileId}: PlanContentProps) {
                 Retry
               </Text>
             </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              className="h-12 items-center justify-center rounded-full border border-border-light px-6 dark:border-border-dark"
-              onPress={resetProfile}>
-              <Text className="text-base font-semibold text-foreground-light dark:text-foreground-dark">
-                Onboard again
-              </Text>
-            </Pressable>
+            <ResetProfileButton />
           </View>
         </View>
       </SafeAreaView>
@@ -302,7 +248,7 @@ function PlanContent({profileId}: PlanContentProps) {
                 <ExerciseCard
                   exercise={exercise}
                   isComplete={completedExerciseIds.has(exercise.exerciseId)}
-                  onToggleComplete={toggleExerciseComplete}
+                  onToggleComplete={completePlanMutation.mutate}
                 />
               </View>
             ))}

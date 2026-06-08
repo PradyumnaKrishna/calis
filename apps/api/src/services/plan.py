@@ -1,8 +1,9 @@
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 from sqlmodel import Session, select
 
-from ..models import Exercise, Level, Profile, VolumeTier
+from ..models import Exercise, Level, PlanSnapshot, Profile, VolumeTier
 from ..schemas import CurrentPlan, PlanExercise, PlanWorkout
 from .progression import next_level, previous_level
 
@@ -92,6 +93,38 @@ def generate_current_plan(session: Session, profile: Profile) -> CurrentPlan:
         cycle_days=7,
         workouts=workouts,
     )
+
+
+def get_current_plan(session: Session, profile: Profile) -> CurrentPlan:
+    snapshot = session.get(PlanSnapshot, profile.id)
+
+    if (
+        snapshot is not None
+        and snapshot.plan_level == profile.current_plan_level
+        and snapshot.volume_tier == profile.current_volume_tier
+    ):
+        return CurrentPlan.model_validate(snapshot.plan_data)
+
+    plan = generate_current_plan(session, profile)
+    plan_data = plan.model_dump(mode="json")
+
+    if snapshot is None:
+        snapshot = PlanSnapshot(
+            profile_id=profile.id,
+            plan_level=profile.current_plan_level,
+            volume_tier=profile.current_volume_tier,
+            plan_data=plan_data,
+        )
+    else:
+        snapshot.plan_level = profile.current_plan_level
+        snapshot.volume_tier = profile.current_volume_tier
+        snapshot.plan_data = plan_data
+        snapshot.updated_at = datetime.now(UTC)
+
+    session.add(snapshot)
+    session.commit()
+
+    return plan
 
 
 def _normalized_frequency(training_days: int) -> int:
@@ -254,6 +287,8 @@ def _plan_exercise(exercise: Exercise, tier: VolumeTier) -> PlanExercise:
         slug=exercise.slug,
         name=exercise.name,
         movement_pattern=exercise.movement_pattern,
+        gif=exercise.gif,
+        instructions=exercise.instructions,
         sets=volume.sets,
         reps=None if is_hold else volume.reps,
         hold_seconds=volume.hold_seconds if is_hold else None,

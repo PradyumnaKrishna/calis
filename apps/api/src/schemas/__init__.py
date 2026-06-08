@@ -1,11 +1,11 @@
 from .exercise import ExerciseList, ExercisePublic
 from .level import AnswerValue, LevelAssessment, LevelRequest
 from .plan import (
+    CompleteTodayExerciseRequest,
     CurrentPlan,
     PlanExercise,
-    PlanProgressRequest,
-    PlanProgressResponse,
     PlanWorkout,
+    TodayPlan,
 )
 from .profile import ProfileCreated, ProfileCreateRequest
 from .questionnaire import Questionnaire, QuestionnaireOption, QuestionnaireStep
@@ -16,11 +16,11 @@ __all__ = [
     "AnswerValue",
     "LevelAssessment",
     "LevelRequest",
+    "CompleteTodayExerciseRequest",
     "CurrentPlan",
     "PlanExercise",
-    "PlanProgressRequest",
-    "PlanProgressResponse",
     "PlanWorkout",
+    "TodayPlan",
     "ProfileCreated",
     "ProfileCreateRequest",
     "Questionnaire",

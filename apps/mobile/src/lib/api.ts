@@ -31,3 +31,11 @@ function createApi() {
 export function useApi() {
   return useMemo(() => createApi(), []);
 }
+
+export function getApiAssetUrl(path: string) {
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  return `${baseUrl}/${path.replace(/^\/+/, '')}`;
+}
