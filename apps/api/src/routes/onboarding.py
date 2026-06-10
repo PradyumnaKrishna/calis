@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 
 from ..core.database import get_session
@@ -12,7 +12,11 @@ from ..schemas import (
     OnboardingResponse,
     ProfilePublic,
 )
-from ..services.onboarding_ai import assess_onboarding, generate_onboarding_questions
+from ..services.onboarding_ai import (
+    OnboardingAIError,
+    assess_onboarding,
+    generate_onboarding_questions,
+)
 from ..services.profile import apply_onboarding_assessment
 from .dependencies import get_profile
 
@@ -67,7 +71,13 @@ def submit(
         return OnboardingResponse(status="in_progress", questions=questions)
 
     if _is_initial_question_set(questions):
-        next_questions = generate_onboarding_questions(answers)
+        try:
+            next_questions = generate_onboarding_questions(answers)
+        except OnboardingAIError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=str(exc),
+            ) from exc
 
         if next_questions:
             onboarding_session.questions = [
@@ -79,7 +89,13 @@ def submit(
 
             return OnboardingResponse(status="in_progress", questions=next_questions)
 
-    assessment = assess_onboarding(answers)
+    try:
+        assessment = assess_onboarding(answers)
+    except OnboardingAIError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
     apply_onboarding_assessment(profile, assessment)
     onboarding_session.status = OnboardingStatus.COMPLETED
     onboarding_session.assessment = assessment.model_dump(mode="json")
