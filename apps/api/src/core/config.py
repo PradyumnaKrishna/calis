@@ -1,8 +1,10 @@
 from pathlib import Path
 import os
 
+from dotenv import load_dotenv
 
 API_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(API_ROOT / ".env")
 
 
 def _sqlite_path(database_url: str) -> Path:
@@ -17,3 +19,5 @@ def _sqlite_path(database_url: str) -> Path:
 DATABASE_PATH = _sqlite_path(os.getenv("DATABASE_URL", "file:./.data/calis.sqlite"))
 CORS_ORIGIN = os.getenv("CORS_ORIGIN", "*")
 PORT = int(os.getenv("PORT", "3001"))
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")

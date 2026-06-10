@@ -20,7 +20,9 @@ const middleware: Middleware = {
     if (!request.headers.has('X-Profile-Id')) {
       const profileId = await getStoredProfileId();
 
-      request.headers.set('X-Profile-Id', profileId ?? '');
+      if (profileId) {
+        request.headers.set('X-Profile-Id', profileId);
+      }
     }
 
     return request;

@@ -18,17 +18,14 @@ class Profile(SQLModel, table=True):
 
     id: str = Field(primary_key=True)
     goal: str = Field(default="general_fitness", index=True)
-    level: Level = Field(index=True)
+    level: Level = Field(default=Level.FOUNDATION, index=True)
     training_days: int = Field(default=3, index=True)
     equipment: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     constraints: list[str] = Field(default_factory=list, sa_column=Column(JSON))
-    answers: dict[str, str | list[str]] = Field(
-        default_factory=dict,
-        sa_column=Column(JSON),
-    )
-    current_plan_level: Level = Field(index=True)
+    current_plan_level: Level = Field(default=Level.FOUNDATION, index=True)
     current_volume_tier: VolumeTier = Field(default=VolumeTier.LOW, index=True)
     current_plan_started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    onboarded: bool = Field(default=False, index=True)
     streak: int = Field(default=0, index=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

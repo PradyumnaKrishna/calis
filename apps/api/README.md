@@ -32,7 +32,7 @@ Apply migrations without seeding:
 .venv/bin/calis-api-migrate
 ```
 
-Seed applies migrations first, then replaces questionnaire and exercise seed rows.
+Seed applies migrations first, then replaces exercise seed rows.
 For a fresh local SQLite database:
 
 ```sh
@@ -51,3 +51,41 @@ src/
   scripts/    seed and import commands, plus seed data
   services/   application logic
 ```
+
+## AI Onboarding
+
+Profile reads are the bootstrap step. `GET /api/v1/profile` creates a
+non-onboarded profile when no `X-Profile-Id` is present, and returns `401` when
+the supplied profile id is invalid.
+
+Onboarding is profile-scoped and requires `X-Profile-Id`. It uses one generic
+question/answer contract:
+
+```http
+GET /api/v1/onboarding
+POST /api/v1/onboarding
+```
+
+`GET /onboarding` returns the current questions. `POST /onboarding` stores
+answers for those questions. The backend may ask more AI-generated questions, or
+complete onboarding and mark `profiles.onboarded = true`.
+
+Completed onboarding returns:
+
+```json
+{
+  "status": "completed",
+  "profile": {
+    "profileId": "profile_123",
+    "level": "beginner",
+    "currentPlanLevel": "beginner",
+    "currentVolumeTier": "low",
+    "onboarded": true,
+    "streak": 0
+  }
+}
+```
+
+Set `GEMINI_API_KEY` to enable Gemini. `GEMINI_MODEL` defaults to
+`gemini-2.5-flash`. Without an API key, the service uses a local fallback for
+development.

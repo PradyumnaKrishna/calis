@@ -1,23 +1,23 @@
-import {useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 
 import {ActivityIndicator, Pressable, ScrollView, Text, View} from 'react-native';
 
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {useRouter} from 'expo-router';
-import Animated, {FadeInDown, FadeInUp, LinearTransition} from 'react-native-reanimated';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
-import {LevelIcon} from '../components/level-icon';
 import {NativeWindFeather} from '../components/nativewind-feather';
+import {CompletedResult} from '../components/onboarding/completed-result';
 import {OnboardingHint} from '../components/onboarding/hint';
+import {QuestionStep} from '../components/onboarding/question-step';
 import {ProgressBar} from '../components/progress-bar';
 import {useApi} from '../lib/api';
 import type {components} from '../lib/api-schema';
-import {LEVEL_CONTENT} from '../lib/level';
-import {storeProfileId} from '../lib/profile-storage';
+import {useProfile} from '../lib/use-profile';
 
-type Answers = components['schemas']['ProfileCreateRequest']['answers'];
-type ProfileCreated = components['schemas']['ProfileCreated'];
+type Answers = NonNullable<components['schemas']['OnboardingRequest']['answers']>;
+type Answer = Answers[string];
+type Profile = components['schemas']['ProfilePublic'];
 
 export default function OnboardingScreen() {
   const api = useApi();
@@ -25,16 +25,15 @@ export default function OnboardingScreen() {
   const queryClient = useQueryClient();
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
-  const [createdProfile, setCreatedProfile] = useState<ProfileCreated | null>(null);
-  const {
-    data: questionnaire,
-    isError,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['onboarding-questionnaire'],
+  const [completedProfile, setCompletedProfile] = useState<Profile | null>(null);
+
+  const profileQuery = useProfile();
+
+  const onboardingQuery = useQuery({
+    enabled: Boolean(profileQuery.profile?.profileId && !profileQuery.profile.onboarded),
+    queryKey: ['onboarding', profileQuery.profile?.profileId],
     queryFn: async () => {
-      const {data, error} = await api.GET('/api/v1/onboarding/questionnaire');
+      const {data, error} = await api.GET('/api/v1/onboarding');
 
       if (error) {
         throw error;
@@ -46,7 +45,7 @@ export default function OnboardingScreen() {
 
   const submit = useMutation({
     mutationFn: async (nextAnswers: Answers) => {
-      const {data, error} = await api.POST('/api/v1/onboarding/profile', {
+      const {data, error} = await api.POST('/api/v1/onboarding', {
         body: {answers: nextAnswers},
       });
 
@@ -56,78 +55,82 @@ export default function OnboardingScreen() {
 
       return data;
     },
-    onSuccess: async (profile) => {
-      await storeProfileId(profile.profileId);
-      queryClient.setQueryData(['stored-profile-id'], profile.profileId);
-      queryClient.setQueryData(['profile'], profile);
-      setCreatedProfile(profile);
+    onSuccess: async (response) => {
+      if (response.status === 'completed' && response.profile) {
+        setCompletedProfile(response.profile);
+        queryClient.invalidateQueries({queryKey: ['profile']});
+        return;
+      }
+
+      queryClient.setQueryData(['onboarding', profileQuery.profile?.profileId], response);
+      setAnswers({});
+      setStepIndex(0);
     },
   });
 
-  if (createdProfile) {
-    const result = LEVEL_CONTENT[createdProfile.level];
+  const profile = completedProfile ?? profileQuery.profile;
+  const questions = onboardingQuery.data?.questions ?? [];
+  const question = questions[stepIndex];
+  const selected = question ? answers[question.id] : undefined;
+  const isLastStep = stepIndex === questions.length - 1;
+  const canContinue = useMemo(() => {
+    if (!question) {
+      return false;
+    }
 
+    if (!question.required) {
+      return true;
+    }
+
+    return hasAnswer(selected);
+  }, [question, selected]);
+
+  useEffect(() => {
+    if (!profileQuery.profile) {
+      return;
+    }
+
+    if (profileQuery.profile.onboarded && !completedProfile) {
+      router.replace('/' as never);
+    }
+  }, [completedProfile, profileQuery.profile, router]);
+
+  if (profile?.onboarded && completedProfile) {
     return (
-      <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
-        <View className="flex-1 justify-center px-6">
-          <Animated.View
-            className="items-center"
-            entering={FadeInUp.duration(420).springify().damping(18)}
-            style={{alignItems: 'center'}}>
-            <LevelIcon contained level={createdProfile.level} size={96} />
-            <Text
-              className="mt-5 text-center text-foreground-light dark:text-foreground-dark"
-              style={{fontSize: 40, fontWeight: '900', lineHeight: 48}}>
-              {result.label}
-            </Text>
-            <Text className="mt-3 max-w-sm text-center text-base font-normal leading-6 text-muted-light dark:text-muted-dark">
-              {result.resultDescription}
-            </Text>
-          </Animated.View>
-
-          <Animated.View entering={FadeInDown.delay(160).duration(360)}>
-            <Pressable
-              accessibilityRole="button"
-              className="mt-10 flex-row items-center justify-center gap-1.5 self-center py-2"
-              onPress={() => router.replace('/' as never)}>
-              <Text className="text-center font-mono text-xs uppercase tracking-widest text-foreground-light dark:text-foreground-dark">
-                Start training
-              </Text>
-              <NativeWindFeather
-                className="text-foreground-light dark:text-foreground-dark"
-                name="arrow-right"
-                size={14}
-              />
-            </Pressable>
-          </Animated.View>
-        </View>
-      </SafeAreaView>
+      <CompletedResult
+        profile={completedProfile}
+        onStartTraining={() => router.replace('/' as never)}
+      />
     );
   }
 
-  if (isLoading) {
+  if (profileQuery.isLoading || onboardingQuery.isLoading || !question) {
     return (
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
         <View className="flex-1 justify-center p-6">
-          <Text className="text-base font-semibold text-foreground-light dark:text-foreground-dark">
-            Loading onboarding...
+          <ActivityIndicator color="#63635E" />
+          <Text className="mt-4 text-base font-semibold text-muted-light dark:text-muted-dark">
+            Preparing onboarding...
           </Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  if (isError || !questionnaire) {
+  if (profileQuery.isError || onboardingQuery.isError) {
     return (
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
         <View className="flex-1 justify-center gap-4 p-6">
-          <Text className="text-xl font-bold text-foreground-light dark:text-foreground-dark">
+          <Text className="text-2xl font-bold text-foreground-light dark:text-foreground-dark">
             Onboarding is unavailable
           </Text>
           <Pressable
             accessibilityRole="button"
             className="h-12 w-32 items-center justify-center rounded-full bg-foreground-light dark:bg-foreground-dark"
-            onPress={() => refetch()}>
+            onPress={() => {
+              profileQuery.refetch();
+              onboardingQuery.refetch();
+            }}>
             <Text className="text-base font-semibold text-background-light dark:text-background-dark">
               Retry
             </Text>
@@ -137,58 +140,50 @@ export default function OnboardingScreen() {
     );
   }
 
-  const steps = questionnaire.steps;
-  const step = steps[stepIndex];
-  const selected = answers[step.id];
-  const isLastStep = stepIndex === steps.length - 1;
-  const isFullfilled =
-    step.type === 'single'
-      ? typeof selected === 'string'
-      : Array.isArray(selected) && selected.length >= (step.minSelections ?? 0);
-
   function goBack() {
     setStepIndex((current) => Math.max(0, current - 1));
   }
 
   function continueToNextStep() {
-    if (step.type === 'multi' && !isFullfilled) {
+    if (!canContinue || submit.isPending) {
       return;
     }
 
     if (isLastStep) {
       submit.mutate(answers);
-    } else {
-      setStepIndex((current) => current + 1);
+      return;
     }
+
+    setStepIndex((current) => current + 1);
+  }
+
+  function setAnswer(questionId: string, answer: Answer) {
+    setAnswers((current) => ({...current, [questionId]: answer}));
   }
 
   function selectOption(optionId: string) {
-    if (step.type === 'multi') {
-      setAnswers((current) => {
-        const currentAnswer = current[step.id];
-        const selectedIds = Array.isArray(currentAnswer) ? currentAnswer : [];
-        let nextSelectedIds: string[];
+    if (!question) {
+      return;
+    }
 
-        if (selectedIds.includes(optionId)) {
-          nextSelectedIds = selectedIds.filter((selectedId) => selectedId !== optionId);
-        } else if (selectedIds.length >= (step.maxSelections ?? step.options.length)) {
-          nextSelectedIds = selectedIds;
-        } else {
-          nextSelectedIds = [...selectedIds, optionId];
-        }
+    if (question.type === 'multi_select') {
+      const selectedIds = Array.isArray(selected) ? selected : [];
+      const nextSelectedIds = selectedIds.includes(optionId)
+        ? selectedIds.filter((selectedId) => selectedId !== optionId)
+        : [...selectedIds, optionId];
 
-        return {...current, [step.id]: nextSelectedIds};
-      });
+      setAnswer(question.id, nextSelectedIds);
+      return;
+    }
+
+    const nextAnswers = {...answers, [question.id]: optionId};
+
+    setAnswers(nextAnswers);
+
+    if (isLastStep) {
+      submit.mutate(nextAnswers);
     } else {
-      const nextAnswers = {...answers, [step.id]: optionId};
-
-      setAnswers(nextAnswers);
-
-      if (isLastStep) {
-        submit.mutate(nextAnswers);
-      } else {
-        setStepIndex((current) => current + 1);
-      }
+      setStepIndex((current) => current + 1);
     }
   }
 
@@ -209,83 +204,41 @@ export default function OnboardingScreen() {
               />
             </Pressable>
           ) : null}
-          <ProgressBar value={(stepIndex + 1) / steps.length} />
+          <ProgressBar value={(stepIndex + 1) / questions.length} />
         </View>
 
         <ScrollView
           className="flex-1"
           contentContainerClassName="pb-6"
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-          <Animated.View
-            entering={FadeInUp.duration(280)}
-            key={`question-${step.id}`}
-            layout={LinearTransition.duration(220)}>
-            <Text className="mb-3 text-xs font-semibold uppercase text-muted-light dark:text-muted-dark">
-              {step.eyebrow}
+          <QuestionStep
+            key={question.id}
+            disabled={submit.isPending}
+            question={question}
+            selected={selected}
+            onSelect={selectOption}
+            onTextChange={(value) => setAnswer(question.id, value)}
+          />
+
+          {submit.isError ? (
+            <Text className="mt-5 max-w-sm text-base font-semibold leading-6 text-danger-light dark:text-danger-dark">
+              Could not save your answer. Try again.
             </Text>
-            <Text className="max-w-sm text-3xl font-bold leading-9 text-foreground-light dark:text-foreground-dark">
-              {step.question}
-            </Text>
-          </Animated.View>
-
-          <View className="mt-6 gap-4">
-            {step.options.map((option, optionIndex) => {
-              const isSelected = Array.isArray(selected)
-                ? selected.includes(option.id)
-                : selected === option.id;
-
-              return (
-                <Animated.View
-                  entering={FadeInDown.delay(optionIndex * 45).duration(260)}
-                  key={option.id}
-                  layout={LinearTransition.duration(220)}>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityState={{disabled: submit.isPending, selected: isSelected}}
-                    className={[
-                      'min-h-12 w-full max-w-sm items-center justify-center self-start rounded-full border px-6 py-3',
-                      isSelected
-                        ? 'border-foreground-light bg-foreground-light dark:border-foreground-dark dark:bg-foreground-dark'
-                        : 'border-border-light bg-background-light dark:border-border-dark dark:bg-background-dark',
-                    ].join(' ')}
-                    disabled={submit.isPending}
-                    onPress={() => selectOption(option.id)}>
-                    <Text
-                      className={[
-                        'text-center text-base font-semibold',
-                        isSelected
-                          ? 'text-background-light dark:text-background-dark'
-                          : 'text-foreground-light dark:text-foreground-dark',
-                      ].join(' ')}>
-                      {option.label}
-                    </Text>
-                  </Pressable>
-                </Animated.View>
-              );
-            })}
-          </View>
-
-          {step.type === 'single' && submit.isPending ? (
-            <View className="mt-8 flex-row items-center gap-3">
-              <ActivityIndicator color="#63635E" />
-              <Text className="text-base font-semibold text-muted-light dark:text-muted-dark">
-                Saving...
-              </Text>
-            </View>
           ) : null}
 
-          {step.type === 'multi' ? (
+          {question.type === 'text' || question.type === 'multi_select' || !question.required ? (
             <View className="mt-8 w-full max-w-sm flex-row justify-end">
               <Pressable
                 accessibilityRole="button"
-                accessibilityState={{disabled: !isFullfilled}}
+                accessibilityState={{disabled: !canContinue}}
                 className={[
-                  'h-12 w-36 items-center justify-center rounded-full',
-                  isFullfilled && !submit.isPending
+                  'h-12 min-w-36 items-center justify-center rounded-full px-6',
+                  canContinue && !submit.isPending
                     ? 'bg-foreground-light dark:bg-foreground-dark'
                     : 'bg-border-light dark:bg-border-dark',
                 ].join(' ')}
-                disabled={!isFullfilled || submit.isPending}
+                disabled={!canContinue || submit.isPending}
                 onPress={continueToNextStep}>
                 {submit.isPending ? (
                   <ActivityIndicator color="#FDFDFC" />
@@ -299,8 +252,26 @@ export default function OnboardingScreen() {
           ) : null}
         </ScrollView>
 
-        <OnboardingHint eyebrow={step.eyebrow} hint={step.hint} />
+        {question.hintSummary && question.hintDescription ? (
+          <OnboardingHint
+            detail={question.hintDescription}
+            eyebrow="Onboarding"
+            summary={question.hintSummary}
+          />
+        ) : null}
       </View>
     </SafeAreaView>
   );
+}
+
+function hasAnswer(answer: Answer | undefined) {
+  if (typeof answer === 'string') {
+    return answer.trim().length > 0;
+  }
+
+  if (Array.isArray(answer)) {
+    return answer.length > 0;
+  }
+
+  return false;
 }

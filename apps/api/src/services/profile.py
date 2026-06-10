@@ -4,71 +4,14 @@ from uuid import uuid4
 from sqlmodel import Session
 
 from ..models import Profile, VolumeTier
-from ..schemas import AnswerValue
-from .level import assess_level
+from ..schemas import OnboardingAssessment
 from .progression import next_level
 
 
-def _single_answer(
-    answers: dict[str, AnswerValue], key: str, default: str
-) -> str:
-    value = answers.get(key)
-
-    if isinstance(value, str):
-        return value
-
-    if isinstance(value, list) and value:
-        return value[0]
-
-    return default
-
-
-def _multi_answer(answers: dict[str, AnswerValue], key: str) -> list[str]:
-    value = answers.get(key)
-
-    if isinstance(value, list):
-        return value
-
-    if isinstance(value, str):
-        return [value]
-
-    return []
-
-
-def _training_days(answer: str) -> int:
-    match answer:
-        case "days_1":
-            return 1
-        case "days_2":
-            return 2
-        case "days_4_plus":
-            return 4
-        case _:
-            return 3
-
-
-def create_profile(session: Session, answers: dict[str, AnswerValue]) -> Profile:
-    level = assess_level(session, answers)
-    goal = _single_answer(answers, "primary_goal", "general_fitness")
-    training_days = _training_days(_single_answer(answers, "training_days", "days_3"))
-    equipment = _multi_answer(answers, "equipment")
-    constraints = [
-        item for item in _multi_answer(answers, "constraints") if item != "none"
-    ]
+def create_default_profile(session: Session) -> Profile:
     now = datetime.now(UTC)
-
     profile = Profile(
         id=f"profile_{uuid4().hex}",
-        goal=goal,
-        level=level,
-        training_days=training_days,
-        equipment=equipment,
-        constraints=constraints,
-        answers=answers,
-        current_plan_level=level,
-        current_volume_tier=VolumeTier.LOW,
-        current_plan_started_at=now,
-        streak=0,
         created_at=now,
         updated_at=now,
     )
@@ -77,6 +20,24 @@ def create_profile(session: Session, answers: dict[str, AnswerValue]) -> Profile
     session.refresh(profile)
 
     return profile
+
+
+def apply_onboarding_assessment(
+    profile: Profile,
+    assessment: OnboardingAssessment,
+) -> None:
+    now = datetime.now(UTC)
+
+    profile.goal = assessment.goal
+    profile.level = assessment.level
+    profile.training_days = assessment.training_days
+    profile.equipment = assessment.equipment
+    profile.constraints = assessment.constraints
+    profile.current_plan_level = assessment.level
+    profile.current_volume_tier = VolumeTier.LOW
+    profile.current_plan_started_at = now
+    profile.onboarded = True
+    profile.updated_at = now
 
 
 def advance_profile_plan(profile: Profile) -> None:

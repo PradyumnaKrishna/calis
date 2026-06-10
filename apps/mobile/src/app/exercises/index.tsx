@@ -197,7 +197,7 @@ function ExerciseListCard({exercise}: {exercise: Exercise}) {
       accessibilityLabel={`Open ${exercise.name}`}
       accessibilityRole="button"
       className="flex-row gap-4 rounded-lg border border-border-light p-3 dark:border-border-dark"
-      onPress={() => router.push(`/exercises/${exercise.slug}` as never)}>
+      onPress={() => router.push(`/exercises/${exercise.slug}`)}>
       <Image
         accessibilityIgnoresInvertColors
         accessibilityLabel={`${exercise.name} demonstration`}

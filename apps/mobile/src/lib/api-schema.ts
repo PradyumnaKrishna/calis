@@ -55,34 +55,18 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/api/v1/onboarding/questionnaire': {
+  '/api/v1/onboarding': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Questionnaire */
-    get: operations['questionnaire_api_v1_onboarding_questionnaire_get'];
+    /** Onboarding */
+    get: operations['onboarding_api_v1_onboarding_get'];
     put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/onboarding/profile': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Profile */
-    post: operations['profile_api_v1_onboarding_profile_post'];
+    /** Submit */
+    post: operations['submit_api_v1_onboarding_post'];
     delete?: never;
     options?: never;
     head?: never;
@@ -198,6 +182,56 @@ export interface components {
      * @enum {string}
      */
     Level: 'foundation' | 'beginner' | 'intermediate' | 'advanced';
+    /** OnboardingOption */
+    OnboardingOption: {
+      /** Id */
+      id: string;
+      /** Label */
+      label: string;
+    };
+    /** OnboardingQuestion */
+    OnboardingQuestion: {
+      /** Id */
+      id: string;
+      /**
+       * Type
+       * @enum {string}
+       */
+      type: 'text' | 'select' | 'multi_select';
+      /** Label */
+      label: string;
+      /** Hint */
+      hint?: string | null;
+      /** Hintsummary */
+      hintSummary: string;
+      /** Hintdescription */
+      hintDescription: string;
+      /**
+       * Required
+       * @default true
+       */
+      required: boolean;
+      /** Options */
+      options?: components['schemas']['OnboardingOption'][];
+    };
+    /** OnboardingRequest */
+    OnboardingRequest: {
+      /** Answers */
+      answers: {
+        [key: string]: string | string[];
+      };
+    };
+    /** OnboardingResponse */
+    OnboardingResponse: {
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: 'in_progress' | 'completed';
+      /** Questions */
+      questions?: components['schemas']['OnboardingQuestion'][];
+      profile?: components['schemas']['ProfilePublic'] | null;
+    };
     /** PlanExercise */
     PlanExercise: {
       /** Exerciseid */
@@ -230,23 +264,6 @@ export interface components {
       /** Exercises */
       exercises: components['schemas']['PlanExercise'][];
     };
-    /** ProfileCreateRequest */
-    ProfileCreateRequest: {
-      /** Answers */
-      answers: {
-        [key: string]: string | string[];
-      };
-    };
-    /** ProfileCreated */
-    ProfileCreated: {
-      /** Profileid */
-      profileId: string;
-      level: components['schemas']['Level'];
-      currentPlanLevel: components['schemas']['Level'];
-      currentVolumeTier: components['schemas']['VolumeTier'];
-      /** Streak */
-      streak: number;
-    };
     /** ProfilePublic */
     ProfilePublic: {
       /** Profileid */
@@ -254,52 +271,10 @@ export interface components {
       level: components['schemas']['Level'];
       currentPlanLevel: components['schemas']['Level'];
       currentVolumeTier: components['schemas']['VolumeTier'];
+      /** Onboarded */
+      onboarded: boolean;
       /** Streak */
       streak: number;
-    };
-    /** Questionnaire */
-    Questionnaire: {
-      /** Id */
-      id: string;
-      /** Title */
-      title: string;
-      /** Description */
-      description: string;
-      /** Steps */
-      steps: components['schemas']['QuestionnaireStep'][];
-    };
-    /** QuestionnaireOption */
-    QuestionnaireOption: {
-      /** Id */
-      id: string;
-      /** Label */
-      label: string;
-      /** Score */
-      score?: number | null;
-    };
-    /** QuestionnaireStep */
-    QuestionnaireStep: {
-      /** Id */
-      id: string;
-      /**
-       * Type
-       * @enum {string}
-       */
-      type: 'single' | 'multi';
-      /** Weight */
-      weight: number;
-      /** Eyebrow */
-      eyebrow: string;
-      /** Question */
-      question: string;
-      /** Hint */
-      hint: string;
-      /** Minselections */
-      minSelections?: number | null;
-      /** Maxselections */
-      maxSelections?: number | null;
-      /** Options */
-      options: components['schemas']['QuestionnaireOption'][];
     };
     /** TodayPlan */
     TodayPlan: {
@@ -412,7 +387,7 @@ export interface operations {
       };
     };
   };
-  questionnaire_api_v1_onboarding_questionnaire_get: {
+  onboarding_api_v1_onboarding_get: {
     parameters: {
       query?: never;
       header?: never;
@@ -427,12 +402,12 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['Questionnaire'];
+          'application/json': components['schemas']['OnboardingResponse'];
         };
       };
     };
   };
-  profile_api_v1_onboarding_profile_post: {
+  submit_api_v1_onboarding_post: {
     parameters: {
       query?: never;
       header?: never;
@@ -441,7 +416,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['ProfileCreateRequest'];
+        'application/json': components['schemas']['OnboardingRequest'];
       };
     };
     responses: {
@@ -451,7 +426,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['ProfileCreated'];
+          'application/json': components['schemas']['OnboardingResponse'];
         };
       };
       /** @description Validation Error */

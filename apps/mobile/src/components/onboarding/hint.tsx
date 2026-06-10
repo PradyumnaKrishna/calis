@@ -8,10 +8,16 @@ import {NativeWindFeather} from '../nativewind-feather';
 type OnboardingHintProps = {
   defaultOpen?: boolean;
   eyebrow: string;
-  hint: string;
+  detail: string;
+  summary: string;
 };
 
-export function OnboardingHint({defaultOpen = false, eyebrow, hint}: OnboardingHintProps) {
+export function OnboardingHint({
+  defaultOpen = false,
+  detail,
+  eyebrow,
+  summary,
+}: OnboardingHintProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
@@ -24,7 +30,7 @@ export function OnboardingHint({defaultOpen = false, eyebrow, hint}: OnboardingH
         <Text
           className="flex-1 text-base font-semibold leading-6 text-muted-light dark:text-muted-dark"
           numberOfLines={2}>
-          {hint}
+          {summary}
         </Text>
         <View className="h-14 w-14 items-center justify-center rounded-full bg-background-light shadow-xl dark:bg-background-dark">
           <NativeWindFeather
@@ -43,7 +49,7 @@ export function OnboardingHint({defaultOpen = false, eyebrow, hint}: OnboardingH
           Why this matters
         </Text>
         <Text className="mt-4 text-base leading-6 text-muted-light dark:text-muted-dark">
-          {hint}
+          {detail}
         </Text>
         <Pressable
           className="mt-6 h-12 items-center justify-center rounded-full bg-foreground-light dark:bg-foreground-dark"

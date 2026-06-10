@@ -2,11 +2,6 @@ from pydantic import ConfigDict
 from sqlmodel import Field, SQLModel
 
 from ..models import Level, VolumeTier
-from .level import AnswerValue
-
-
-class ProfileCreateRequest(SQLModel):
-    answers: dict[str, AnswerValue]
 
 
 class ProfileCreated(SQLModel):
@@ -16,6 +11,7 @@ class ProfileCreated(SQLModel):
     level: Level
     current_plan_level: Level = Field(alias="currentPlanLevel")
     current_volume_tier: VolumeTier = Field(alias="currentVolumeTier")
+    onboarded: bool
     streak: int
 
 

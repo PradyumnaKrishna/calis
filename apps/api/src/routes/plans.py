@@ -13,7 +13,7 @@ from ..services.streak import (
     increment_streak,
     reconcile_streak_for_current_plan,
 )
-from .dependencies import get_profile
+from .dependencies import get_onboarded_profile
 
 router = APIRouter(prefix="/plans", tags=["plans"])
 PLAN_ADVANCEMENT_STREAK_THRESHOLD = 4
@@ -21,7 +21,7 @@ PLAN_ADVANCEMENT_STREAK_THRESHOLD = 4
 
 @router.get("", response_model=CurrentPlan)
 def plan(
-    profile: Profile = Depends(get_profile),
+    profile: Profile = Depends(get_onboarded_profile),
     session: Session = Depends(get_session),
 ) -> CurrentPlan:
     return get_current_plan(session, profile)
@@ -29,7 +29,7 @@ def plan(
 
 @router.get("/today", response_model=TodayPlan | None)
 def today_plan(
-    profile: Profile = Depends(get_profile),
+    profile: Profile = Depends(get_onboarded_profile),
     session: Session = Depends(get_session),
 ) -> TodayPlan | None:
     today = date.today()
@@ -63,7 +63,7 @@ def today_plan(
 @router.post("/today", response_model=TodayPlan | None)
 def complete_today_plan(
     request: CompleteTodayExerciseRequest,
-    profile: Profile = Depends(get_profile),
+    profile: Profile = Depends(get_onboarded_profile),
     session: Session = Depends(get_session),
 ) -> TodayPlan | None:
     today = date.today()

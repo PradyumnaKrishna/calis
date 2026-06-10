@@ -17,6 +17,15 @@ def get_profile(
     profile = session.get(Profile, profile_id)
 
     if profile is None:
-        raise HTTPException(status_code=404, detail="Profile not found")
+        raise HTTPException(status_code=401, detail="Profile not found")
+
+    return profile
+
+
+def get_onboarded_profile(
+    profile: Profile = Depends(get_profile),
+) -> Profile:
+    if not profile.onboarded:
+        raise HTTPException(status_code=401, detail="Onboarding required")
 
     return profile

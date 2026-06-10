@@ -18,22 +18,12 @@ import {CarouselDots} from '../components/plan/carousel-dots';
 import {ExerciseCard} from '../components/plan/exercise-card';
 import {ResetProfileButton} from '../components/reset-profile-button';
 import {useApi} from '../lib/api';
-import {getStoredProfileId} from '../lib/profile-storage';
+import {useProfile} from '../lib/use-profile';
 
 export default function PlanRoute() {
-  const router = useRouter();
-  const {data: profileId, isLoading} = useQuery({
-    queryKey: ['stored-profile-id'],
-    queryFn: getStoredProfileId,
-  });
+  const {profile, isError, isLoading, refetch} = useProfile();
 
-  useEffect(() => {
-    if (!isLoading && !profileId) {
-      router.replace('/onboarding' as never);
-    }
-  }, [isLoading, profileId, router]);
-
-  if (profileId) {
+  if (profile?.onboarded) {
     return <PlanContent />;
   }
 
@@ -45,6 +35,26 @@ export default function PlanRoute() {
           <Text className="mt-4 text-base font-semibold text-muted-light dark:text-muted-dark">
             Loading profile...
           </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (isError) {
+    return (
+      <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+        <View className="flex-1 justify-center gap-4 p-6">
+          <Text className="text-2xl font-bold text-foreground-light dark:text-foreground-dark">
+            We could not load your profile
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            className="h-12 w-32 items-center justify-center rounded-full bg-foreground-light dark:bg-foreground-dark"
+            onPress={() => refetch()}>
+            <Text className="text-base font-semibold text-background-light dark:text-background-dark">
+              Retry
+            </Text>
+          </Pressable>
         </View>
       </SafeAreaView>
     );

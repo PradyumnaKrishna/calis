@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState, type ComponentProps} from 'react';
+import {useMemo, useState, type ComponentProps} from 'react';
 
 import {ActivityIndicator, Pressable, ScrollView, Text, View} from 'react-native';
 
@@ -13,20 +13,10 @@ import {TodayPlanCard} from '../components/plan/today-plan-card';
 import {ResetProfileButton} from '../components/reset-profile-button';
 import {useApi} from '../lib/api';
 import type {components} from '../lib/api-schema';
-import {getStoredProfileId} from '../lib/profile-storage';
+import {useProfile} from '../lib/use-profile';
 
 export default function HomeScreen() {
-  const router = useRouter();
-  const {data: profileId, isLoading} = useQuery({
-    queryKey: ['stored-profile-id'],
-    queryFn: getStoredProfileId,
-  });
-
-  useEffect(() => {
-    if (!isLoading && !profileId) {
-      router.replace('/onboarding' as never);
-    }
-  }, [isLoading, profileId, router]);
+  const {profile, isError, isLoading, refetch} = useProfile();
 
   if (isLoading) {
     return (
@@ -41,7 +31,27 @@ export default function HomeScreen() {
     );
   }
 
-  if (profileId) {
+  if (isError) {
+    return (
+      <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+        <View className="flex-1 justify-center gap-4 p-6">
+          <Text className="text-2xl font-bold text-foreground-light dark:text-foreground-dark">
+            We could not load your profile
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            className="h-12 w-32 items-center justify-center rounded-full bg-foreground-light dark:bg-foreground-dark"
+            onPress={() => refetch()}>
+            <Text className="text-base font-semibold text-background-light dark:text-background-dark">
+              Retry
+            </Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (profile?.onboarded) {
     return <DashboardScreen />;
   }
 
@@ -75,15 +85,6 @@ const movementIcons: Record<string, FeatherName> = {
   push: 'arrow-up-circle',
   squat: 'chevrons-down',
 };
-
-const exploreCards: {title: string; description: string; icon: FeatherName; route: string}[] = [
-  {
-    title: 'Exercises',
-    description: 'Browse movement progressions, training cues, and form notes.',
-    icon: 'activity',
-    route: '/exercises',
-  },
-];
 
 function todayAsPlanDay() {
   const day = new Date().getDay();
@@ -123,22 +124,11 @@ function DashboardScreen() {
   });
 
   const {
-    data: profile,
+    profile,
     isError: isProfileError,
     isLoading: isProfileLoading,
     refetch: refetchProfile,
-  } = useQuery({
-    queryKey: ['profile'],
-    queryFn: async () => {
-      const {data, error} = await api.GET('/api/v1/profile');
-
-      if (error) {
-        throw error;
-      }
-
-      return data;
-    },
-  });
+  } = useProfile();
 
   const selectedWorkout = useMemo(
     () => fullPlan?.workouts.find((workout) => workout.day === selectedDay),
@@ -340,34 +330,31 @@ function DashboardScreen() {
             <LevelCard />
 
             <View className="gap-3">
-              {exploreCards.map((card) => (
-                <Pressable
-                  accessibilityRole="button"
-                  className="min-h-24 flex-row items-center gap-4 rounded-lg border border-border-light p-4 dark:border-border-dark"
-                  key={card.title}
-                  onPress={() => router.push(card.route as never)}>
-                  <View className="h-11 w-11 items-center justify-center rounded-full bg-surface-light dark:bg-surface-dark">
-                    <NativeWindFeather
-                      className="text-foreground-light dark:text-foreground-dark"
-                      name={card.icon}
-                      size={20}
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-base font-bold text-foreground-light dark:text-foreground-dark">
-                      {card.title}
-                    </Text>
-                    <Text className="mt-1 text-sm font-semibold leading-5 text-muted-light dark:text-muted-dark">
-                      {card.description}
-                    </Text>
-                  </View>
+              <Pressable
+                accessibilityRole="button"
+                className="min-h-24 flex-row items-center gap-4 rounded-lg border border-border-light p-4 dark:border-border-dark"
+                onPress={() => router.push('/exercises')}>
+                <View className="h-11 w-11 items-center justify-center rounded-full bg-surface-light dark:bg-surface-dark">
                   <NativeWindFeather
-                    className="text-muted-light dark:text-muted-dark"
-                    name="chevron-right"
+                    className="text-foreground-light dark:text-foreground-dark"
+                    name="activity"
                     size={20}
                   />
-                </Pressable>
-              ))}
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base font-bold text-foreground-light dark:text-foreground-dark">
+                    Exercises
+                  </Text>
+                  <Text className="mt-1 text-sm font-semibold leading-5 text-muted-light dark:text-muted-dark">
+                    Browse movement progressions, training cues, and form notes.
+                  </Text>
+                </View>
+                <NativeWindFeather
+                  className="text-muted-light dark:text-muted-dark"
+                  name="chevron-right"
+                  size={20}
+                />
+              </Pressable>
             </View>
           </View>
         </ScrollView>

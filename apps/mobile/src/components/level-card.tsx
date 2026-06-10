@@ -3,28 +3,14 @@ import {useEffect, useState, type ComponentProps} from 'react';
 import {Animated, Easing, Text, View} from 'react-native';
 
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-import {useQuery} from '@tanstack/react-query';
-
-import {useApi} from '../lib/api';
 import {LEVEL_CONTENT, LEVEL_ICON_NAMES, LEVEL_ORDER} from '../lib/level';
+import {useProfile} from '../lib/use-profile';
 
 export function LevelCard() {
-  const api = useApi();
   const [trackWidth, setTrackWidth] = useState(0);
   const [progressAnim] = useState(() => new Animated.Value(0));
 
-  const {data: profile} = useQuery({
-    queryKey: ['profile'],
-    queryFn: async () => {
-      const {data, error} = await api.GET('/api/v1/profile');
-
-      if (error) {
-        throw error;
-      }
-
-      return data;
-    },
-  });
+  const {data: profile} = useProfile();
 
   const level = profile?.currentPlanLevel ?? profile?.level;
   const activeIndex = level ? LEVEL_ORDER.indexOf(level) : -1;
@@ -86,9 +72,7 @@ export function LevelCard() {
                 <MaterialCommunityIcons
                   color={iconColor}
                   name={
-                    LEVEL_ICON_NAMES[item] as ComponentProps<
-                      typeof MaterialCommunityIcons
-                    >['name']
+                    LEVEL_ICON_NAMES[item] as ComponentProps<typeof MaterialCommunityIcons>['name']
                   }
                   size={18}
                 />
