@@ -34,3 +34,21 @@ class PlanWorkoutCompletion(SQLModel, table=True):
     completed: bool = Field(default=False, index=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class PlanWorkoutFeedback(SQLModel, table=True):
+    __tablename__ = "plan_workout_feedback"
+
+    id: str = Field(primary_key=True)
+    profile_id: str = Field(index=True, foreign_key="profiles.id")
+    workout_date: date = Field(index=True)
+    day: int = Field(index=True)
+    plan_level: Level = Field(index=True)
+    volume_tier: VolumeTier = Field(index=True)
+    rating: str = Field(index=True)
+    note: str | None = Field(default=None)
+    ai_action: str | None = Field(default=None, index=True)
+    ai_confidence: str | None = Field(default=None, index=True)
+    ai_rationale: str | None = Field(default=None)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

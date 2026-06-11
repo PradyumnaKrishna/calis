@@ -108,6 +108,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/plans/today/feedback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Submit Today Plan Feedback */
+    post: operations['submit_today_plan_feedback_api_v1_plans_today_feedback_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/profile': {
     parameters: {
       query?: never;
@@ -232,6 +249,21 @@ export interface components {
       questions?: components['schemas']['OnboardingQuestion'][];
       profile?: components['schemas']['ProfilePublic'] | null;
     };
+    /** PlanAdjustmentAssessment */
+    PlanAdjustmentAssessment: {
+      /**
+       * Action
+       * @enum {string}
+       */
+      action: 'keep_plan' | 'reduce_volume' | 'increase_volume' | 'repeat_level' | 'flag_pain';
+      /**
+       * Confidence
+       * @enum {string}
+       */
+      confidence: 'low' | 'medium' | 'high';
+      /** Rationale */
+      rationale: string;
+    };
     /** PlanExercise */
     PlanExercise: {
       /** Exerciseid */
@@ -254,6 +286,21 @@ export interface components {
       holdSeconds?: string | null;
       /** Restseconds */
       restSeconds: number;
+    };
+    /** PlanFeedbackRequest */
+    PlanFeedbackRequest: {
+      /**
+       * Rating
+       * @enum {string}
+       */
+      rating: 'too_hard' | 'manageable' | 'easy' | 'pain' | 'skipped';
+      /** Note */
+      note?: string | null;
+    };
+    /** PlanFeedbackResponse */
+    PlanFeedbackResponse: {
+      plan: components['schemas']['TodayPlan'];
+      assessment?: components['schemas']['PlanAdjustmentAssessment'] | null;
     };
     /** PlanWorkout */
     PlanWorkout: {
@@ -500,6 +547,39 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['TodayPlan'] | null;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  submit_today_plan_feedback_api_v1_plans_today_feedback_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PlanFeedbackRequest'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanFeedbackResponse'] | null;
         };
       };
       /** @description Validation Error */

@@ -14,6 +14,7 @@ import {useRouter} from 'expo-router';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {NativeWindFeather} from '../components/nativewind-feather';
+import {FeedbackSheet} from '../components/plan/feedback-sheet';
 import {CarouselDots} from '../components/plan/carousel-dots';
 import {ExerciseCard} from '../components/plan/exercise-card';
 import {ResetProfileButton} from '../components/reset-profile-button';
@@ -77,6 +78,7 @@ function PlanContent() {
   const {width: windowWidth} = useWindowDimensions();
   const cardScrollRef = useRef<ScrollView>(null);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   const {
     data: plan,
@@ -115,9 +117,12 @@ function PlanContent() {
       queryClient.setQueryData(['today-plan'], nextPlan);
       queryClient.invalidateQueries({queryKey: ['plan']});
       queryClient.invalidateQueries({queryKey: ['profile']});
+
+      if (nextPlan?.completed) {
+        setIsFeedbackOpen(true);
+      }
     },
   });
-
   function updateActiveCardIndex(offsetX: number) {
     if (windowWidth <= 0 || !activeWorkout) {
       return;
@@ -225,6 +230,19 @@ function PlanContent() {
             <Text className="mt-3 text-center text-base font-semibold leading-6 text-muted-light dark:text-muted-dark">
               Come back tomorrow.
             </Text>
+            <Pressable
+              accessibilityRole="button"
+              className="mt-6 h-12 flex-row items-center justify-center gap-2 rounded-full bg-foreground-light px-6 dark:bg-foreground-dark"
+              onPress={() => setIsFeedbackOpen(true)}>
+              <NativeWindFeather
+                className="text-background-light dark:text-background-dark"
+                name="message-square"
+                size={18}
+              />
+              <Text className="text-base font-black text-background-light dark:text-background-dark">
+                Add feedback
+              </Text>
+            </Pressable>
           </View>
         </View>
       ) : activeWorkout ? (
@@ -278,6 +296,8 @@ function PlanContent() {
           </View>
         </View>
       )}
+
+      <FeedbackSheet isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
     </View>
   );
 }

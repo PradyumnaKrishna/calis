@@ -53,3 +53,17 @@ def advance_profile_plan(profile: Profile) -> None:
     now = datetime.now(UTC)
     profile.current_plan_started_at = now
     profile.updated_at = now
+
+
+def reduce_profile_plan_volume(profile: Profile) -> None:
+    match profile.current_volume_tier:
+        case VolumeTier.HIGH:
+            profile.current_volume_tier = VolumeTier.MEDIUM
+        case VolumeTier.MEDIUM:
+            profile.current_volume_tier = VolumeTier.LOW
+        case VolumeTier.LOW:
+            pass
+
+    now = datetime.now(UTC)
+    profile.current_plan_started_at = now
+    profile.updated_at = now

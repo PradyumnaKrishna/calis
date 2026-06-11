@@ -2,8 +2,11 @@ from datetime import UTC, date, datetime, timedelta
 
 from sqlmodel import Session, func, select
 
-from ..models import PlanWorkoutCompletion, Profile
+from ..models import PlanWorkoutCompletion, PlanWorkoutFeedback, Profile
 from ..schemas import CurrentPlan
+
+NEGATIVE_FEEDBACK_RATINGS = {"pain", "skipped", "too_hard"}
+NEGATIVE_FEEDBACK_AI_ACTIONS = {"flag_pain", "reduce_volume", "repeat_level"}
 
 
 def reconcile_streak_for_current_plan(
@@ -46,6 +49,37 @@ def current_plan_completed_workout_count(
     )
 
     return session.exec(statement).one()
+
+
+def current_plan_completed_workout_count_since_last_negative_feedback(
+    session: Session,
+    profile: Profile,
+) -> int:
+    statement = select(func.max(PlanWorkoutFeedback.workout_date)).where(
+        PlanWorkoutFeedback.profile_id == profile.id,
+        PlanWorkoutFeedback.workout_date >= _current_plan_start_date(profile),
+        PlanWorkoutFeedback.plan_level == profile.current_plan_level,
+        PlanWorkoutFeedback.volume_tier == profile.current_volume_tier,
+        (
+            PlanWorkoutFeedback.rating.in_(NEGATIVE_FEEDBACK_RATINGS)
+            | PlanWorkoutFeedback.ai_action.in_(NEGATIVE_FEEDBACK_AI_ACTIONS)
+        ),
+    )
+    last_negative_feedback_date = session.exec(statement).one()
+    count_start_date = _current_plan_start_date(profile)
+
+    if last_negative_feedback_date is not None:
+        count_start_date = max(count_start_date, last_negative_feedback_date)
+
+    completion_statement = select(func.count()).where(
+        PlanWorkoutCompletion.profile_id == profile.id,
+        PlanWorkoutCompletion.workout_date > count_start_date,
+        PlanWorkoutCompletion.completed == True,  # noqa: E712
+        PlanWorkoutCompletion.plan_level == profile.current_plan_level,
+        PlanWorkoutCompletion.volume_tier == profile.current_volume_tier,
+    )
+
+    return session.exec(completion_statement).one()
 
 
 def _has_missed_current_plan_workout(
